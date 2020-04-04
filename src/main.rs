@@ -1,3 +1,8 @@
+mod terminal;
+
+use std::io;
+
 fn main() {
-    println!("Hello, world!");
+    let mut terminal = terminal::init_terminal();
+    terminal::draw_terminal(&mut terminal);
 }
