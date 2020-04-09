@@ -1,6 +1,9 @@
+use crate::util::StatefulList::StatefulList;
+use crate::util::app::App;
+
 use std::io::{stdin, stdout, Write, Error};
 use tui::{backend::CrosstermBackend, Terminal};
-use tui::widgets::{Widget, Block, Borders, List, Text, ListState};
+use tui::widgets::{Widget, Block, Borders, List, Text};
 use tui::layout::{Layout, Constraint, Direction};
 use tui::style::{Color, Modifier, Style};
 use crossterm::{
@@ -16,11 +19,11 @@ pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
 
     terminal.hide_cursor();
     terminal.clear();
-
+    
     return terminal;
 }
 
-pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>) -> () {
+pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, app : &mut App) -> () {
     /*terminal.draw(|mut f| {
         let chunks = Layout::default()
             .direction(Direction::Horizontal)
@@ -42,7 +45,7 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
              .borders(Borders::ALL)
              .render(&mut f, chunks[2]);
     });*/
-
+    
     terminal.draw(|mut f| {
         let chunks = Layout::default()
             .direction(Direction::Horizontal)
@@ -65,14 +68,21 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
             .borders(Borders::ALL)
             .render(&mut f, chunks[2]);
 
-        let style = Style::default().fg(Color::White).bg(Color::Blue);
+        let style = Style::default().fg(Color::White).bg(Color::Black);
 
-        let mut items = ["Item 1", "Item 2", "Item 3"].iter().map(|i| Text::raw(*i));
-        let mut items = List::new(items)
+        //let mut items = ["Item 1", "Item 2", "Item 3"].iter().map(|i| Text::raw(*i));
+        let mut items = app.item_list.items.iter().map(|i| Text::raw(*i));
+
+        let mut items2 = List::new(items)
                 .block(Block::default().borders(Borders::ALL).title("List"))
-                .style(style)
-                /*.highlight_style(style.fg(Color::LightGreen).modifier(Modifier::BOLD))*/
-                /*.highlight_symbol(">")*/;
-            f.render(&mut items, chunks[0]);
+                .style(style);
+
+                f.render(&mut items2, chunks[0]);
         });
+
+        let s : &str = "Test123";
+        app.item_list.items[0] = s;
+
+        app.item_list.next();
+
 }
