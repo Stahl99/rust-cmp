@@ -1,19 +1,16 @@
-use crate::util::StatefulList::StatefulList;
 use crate::util::app::App;
 
-use std::io::{stdin, stdout, Write, Error};
+use std::io::{stdout};
 use tui::{backend::CrosstermBackend, Terminal};
 use tui::widgets::{Widget, Block, Borders, List, Text};
 use tui::layout::{Layout, Constraint, Direction};
-use tui::style::{Color, Modifier, Style};
+use tui::style::{Color, Style};
 use crossterm::{
     event::{self, Event as CEvent, KeyCode},
-    execute,
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 
 pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
-    let mut stdout = stdout()/*.into_raw_mode()*/;
+    let stdout = stdout()/*.into_raw_mode()*/;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend).unwrap();
 
@@ -80,9 +77,11 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
                 f.render(&mut items2, chunks[0]);
         });
 
+        // TEST CODE
         let s : &str = "Test123";
         app.item_list.items[0] = s;
 
         app.item_list.next();
+        // TEST CODE
 
 }

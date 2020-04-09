@@ -10,6 +10,4 @@ edition = "2018"
 crossterm = "0.14"
 rodio = "0.11.0"
 tui = { version = "0.8", default-features = false, features = ['crossterm'] }
-
-[dev-dependencies]
 argh = "0.1"
