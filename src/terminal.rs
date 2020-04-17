@@ -68,7 +68,8 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
         let style = Style::default().fg(Color::White).bg(Color::Black);
 
         //let mut items = ["Item 1", "Item 2", "Item 3"].iter().map(|i| Text::raw(*i));
-        let mut items = app.item_list.items.iter().map(|i| Text::raw(*i));
+        
+        let mut items = app.item_list.items.iter().map(|i| Text::raw(*(&i.as_str())));
 
         let mut items2 = List::new(items)
                 .block(Block::default().borders(Borders::ALL).title("List"))
@@ -78,21 +79,38 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
         });
 
         // TEST CODE
-        let s : &str = "Test123";
-        app.item_list.items[0] = s;
+        //let s : &str = "Test123";
+        //app.item_list.items[0] = s.to_string();
 
-        app.item_list.next();
+        //app.item_list.next();
         // TEST CODE
 
 }
 
 pub fn run_terminal (app : &mut App) {
 
-    let y = app.item_list.state.selected().unwrap();
-    let x = app.item_list.items[y];
-    let mut z : String = "> ".to_owned();
-    z.push_str(&x);
-    let s : &str = z.as_str();
-    app.item_list.items[y] = s;
+
+    if (app.poll_down()) {
+        app.item_list.next();
+    }
+
+    if (app.poll_up()) {
+        app.item_list.previous();
+    }
+
+    // remove "> " from all elements
+    for i in 0..app.item_list.items.len() {
+        if (app.item_list.items[i].chars().nth(0).unwrap() == '>') {
+            app.item_list.items[i] = app.item_list.items[i][2..].to_string();
+        }
+    }
+
+    // Add "> " to selected element
+    let mut selected_element_index : usize = app.item_list.state.selected().unwrap();
+    let selected_element : String  = app.item_list.items[selected_element_index].to_string();
+
+    let mut concatenated_element : String = "> ".to_owned();
+    concatenated_element = concatenated_element + &selected_element;
+    app.item_list.items[selected_element_index] = concatenated_element;
 
 }

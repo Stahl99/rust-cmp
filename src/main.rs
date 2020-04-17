@@ -51,6 +51,8 @@ fn main() {
 
     let mut app = App::new();
 
+    app.item_list.state.select(Some(0));
+
     while !app.should_quit {
 
         terminal::draw_terminal(&mut terminal, &mut app);
@@ -70,8 +72,8 @@ fn handle_user_input (app : &mut App, terminal : &mut Terminal<CrosstermBackend<
                 terminal.show_cursor();
             }
             KeyCode::Left => app.left = true,
-            KeyCode::Up => app.right = true,
-            KeyCode::Right => app.up = true,
+            KeyCode::Up => app.up = true,
+            KeyCode::Right => app.right = true,
             KeyCode::Down => app.down = true,
             _ => {}
         },
