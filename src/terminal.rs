@@ -85,3 +85,14 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
         // TEST CODE
 
 }
+
+pub fn run_terminal (app : &mut App) {
+
+    let y = app.item_list.state.selected().unwrap();
+    let x = app.item_list.items[y];
+    let mut z : String = "> ".to_owned();
+    z.push_str(&x);
+    let s : &str = z.as_str();
+    app.item_list.items[y] = s;
+
+}

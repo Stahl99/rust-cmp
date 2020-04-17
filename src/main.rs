@@ -55,6 +55,7 @@ fn main() {
 
         terminal::draw_terminal(&mut terminal, &mut app);
         handle_user_input(&mut app, &mut terminal, &rx);
+        terminal::run_terminal(&mut app);
 
     }
 }
