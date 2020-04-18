@@ -3,8 +3,10 @@ use crate::util::app::App;
 use std::io::{stdout};
 use tui::{backend::CrosstermBackend, Terminal};
 use tui::widgets::{Widget, Block, Borders, List, Text};
-use tui::layout::{Layout, Constraint, Direction};
-use tui::style::{Color, Style};
+use tui::layout::{Layout, Constraint, Direction, Rect};
+use tui::style::{Color, Style, Modifier};
+use tui::Frame;
+use tui::backend::Backend;
 use crossterm::{
     event::{self, Event as CEvent, KeyCode},
 };
@@ -21,69 +23,119 @@ pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
 }
 
 pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, app : &mut App) -> () {
-    /*terminal.draw(|mut f| {
-        let chunks = Layout::default()
-            .direction(Direction::Horizontal)
-            .margin(1)
-            .constraints(
-                [
-                    Constraint::Percentage(10),
-                    Constraint::Percentage(80),
-                    Constraint::Percentage(10)
-                ].as_ref()
-            )
-            .split(f.size());
-        Block::default()
-             .title(&format!("Block: {}", number.to_string()).to_owned())
-             .borders(Borders::ALL)
-             .render(&mut f, chunks[0]);
-        Block::default()
-             .title("Block 2: ")
-             .borders(Borders::ALL)
-             .render(&mut f, chunks[2]);
-    });*/
-    
-    terminal.draw(|mut f| {
-        let chunks = Layout::default()
-            .direction(Direction::Horizontal)
-            .margin(1)
-            .constraints(
-                [
-                    Constraint::Percentage(10),
-                    Constraint::Percentage(80),
-                    Constraint::Percentage(10)
-                ].as_ref()
-            )
-            .split(f.size());
-        
-        Block::default()
-            .title(&format!("Block 1"))
-            .borders(Borders::ALL)
-            .render(&mut f, chunks[0]);
-        Block::default()
-            .title("Block 2: ")
-            .borders(Borders::ALL)
-            .render(&mut f, chunks[2]);
 
-        let style = Style::default().fg(Color::White).bg(Color::Black);
+        terminal.draw(|mut f| {
+            // set basic chunks
+            let chunks = Layout::default()
+                .direction(Direction::Horizontal)
+                .constraints(
+                    [
+                        Constraint::Min(15), // minimal sidebar length
+                        Constraint::Length(120), // default main window length
+                    ].as_ref()
+                )
+                .split(f.size());
+            
+            // draw basic blocks
+            draw_sidebar(&mut f, app, chunks[0]);
+            draw_main_block(&mut f, app, chunks[1]);
+            
+            });
 
-        //let mut items = ["Item 1", "Item 2", "Item 3"].iter().map(|i| Text::raw(*i));
-        
-        let mut items = app.item_list.items.iter().map(|i| Text::raw(*(&i.as_str())));
+}
 
-        let mut items2 = List::new(items)
-                .block(Block::default().borders(Borders::ALL).title("List"))
-                .style(style);
+fn draw_sidebar(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
 
-                f.render(&mut items2, chunks[0]);
-        });
+    let sidebar = Block::default()
+    .borders(Borders::ALL)
+    .render(f, area);
 
-        // TEST CODE
-        //let s : &str = "Test123";
-        //app.item_list.items[0] = s.to_string();
+    let chunks = Layout::default() 
+        .direction(Direction::Vertical)
+        .constraints(
+            [
+                Constraint::Min(5), // Views
+                Constraint::Length(200), // Playlists
+            ]
+            .as_ref()
+        )
+        .split(area);
 
-        //app.item_list.next();
-        // TEST CODE
+        draw_view_block(&mut f, app, chunks[0]);
+        draw_playlist_block(&mut f, app, chunks[1]);
+
+}
+
+fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    let view_str : &str = "Views";
+
+    let view_block = Block::default()
+    .borders(Borders::ALL)
+    .render(f, area);
+
+    let mut items = app.view_list.items.iter().map(|i| Text::raw(*(&i.as_str())));
+
+    let mut items2 = List::new(items)
+        .block(Block::default().borders(Borders::ALL)
+        .title(view_str)
+        .title_style(Style::default().fg(Color::Rgb(0, 148, 255))));
+
+    f.render(&mut items2, area);
+} 
+
+fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    let playlist_block = Block::default()
+    .title(&format!("Playlists"))
+    .title_style(Style::default().fg(Color::Rgb(0, 148, 255)))
+    .borders(Borders::ALL)
+    .render(f, area);
+} 
+
+fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    let main_block = Block::default()
+    .borders(Borders::ALL)
+    .render(f, area);
+
+    let chunks = Layout::default() 
+        .direction(Direction::Vertical)
+        .constraints(
+            [
+                Constraint::Min(3),
+                Constraint::Length(200),
+            ]
+            .as_ref()
+        )
+        .split(area);
+
+        draw_play_block(&mut f, app, chunks[0]);
+        draw_selection_block(&mut f, app, chunks[1]);
+
+}
+
+fn draw_play_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    let play_block = Block::default()
+    .title(&format!("RUST CMP"))
+    .title_style(Style::default().fg(Color::Rgb(216, 127, 26)))
+    .borders(Borders::ALL)
+    .render(f, area);
+
+}
+
+fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    let selection_block = Block::default()
+    .borders(Borders::ALL)
+    .render(f, area);
 
 }
 
@@ -92,25 +144,27 @@ pub fn run_terminal (app : &mut App) {
 
     if (app.poll_down()) {
         app.item_list.next();
+        app.view_list.next();
     }
 
     if (app.poll_up()) {
         app.item_list.previous();
+        app.view_list.previous();
     }
 
     // remove "> " from all elements
-    for i in 0..app.item_list.items.len() {
-        if (app.item_list.items[i].chars().nth(0).unwrap() == '>') {
-            app.item_list.items[i] = app.item_list.items[i][2..].to_string();
+    for i in 0..app.view_list.items.len() {
+        if (app.view_list.items[i].chars().nth(0).unwrap() == '>') {
+            app.view_list.items[i] = app.view_list.items[i][2..].to_string();
         }
     }
 
     // Add "> " to selected element
-    let mut selected_element_index : usize = app.item_list.state.selected().unwrap();
-    let selected_element : String  = app.item_list.items[selected_element_index].to_string();
+    let mut selected_element_index : usize = app.view_list.state.selected().unwrap();
+    let selected_element : String  = app.view_list.items[selected_element_index].to_string();
 
     let mut concatenated_element : String = "> ".to_owned();
     concatenated_element = concatenated_element + &selected_element;
-    app.item_list.items[selected_element_index] = concatenated_element;
+    app.view_list.items[selected_element_index] = concatenated_element;
 
 }

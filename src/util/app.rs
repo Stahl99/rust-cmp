@@ -4,6 +4,7 @@ use argh::FromArgs;
 
 pub struct App {
     pub item_list: StatefulList<String>,
+    pub view_list: StatefulList<String>,
     pub should_quit: bool,
     pub up: bool,
     pub down: bool,
@@ -14,16 +15,14 @@ pub struct App {
 impl App {
 
     pub fn new() -> App {
-        //let mut vec : Vec<String> = vec!["Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(), "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string()];
-
 
         App {
-            item_list: StatefulList::with_items(//vec
-                
-                vec![
-                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(), "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
-                /*"Item9", "Item10", "Item11", "Item12", "Item13", "Item14", "Item15", "Item16",
-                "Item17", "Item18", "Item19", "Item20", "Item21", "Item22", "Item23", "Item24",*/
+            item_list: StatefulList::with_items(vec![
+                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
+                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
+            ]),
+            view_list: StatefulList::with_items(vec![
+                "Artist".to_string(), "Albums".to_string(), "Tracks".to_string(),
             ]),
             should_quit: false,
             up: false,

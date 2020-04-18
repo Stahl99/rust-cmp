@@ -52,6 +52,7 @@ fn main() {
     let mut app = App::new();
 
     app.item_list.state.select(Some(0));
+    app.view_list.state.select(Some(0));
 
     while !app.should_quit {
 
