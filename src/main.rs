@@ -61,6 +61,9 @@ fn main() {
         terminal::run_terminal(&mut app);
 
     }
+
+    terminal.clear();
+
 }
 
 fn handle_user_input (app : &mut App, terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, rx : &Receiver<Event<crossterm::event::KeyEvent>>)

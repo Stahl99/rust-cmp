@@ -1,14 +1,12 @@
 use crate::util::app::App;
 
 use std::io::{stdout};
-use tui::{backend::CrosstermBackend, Terminal};
-use tui::widgets::{Widget, Block, Borders, List, Text};
-use tui::layout::{Layout, Constraint, Direction, Rect};
-use tui::style::{Color, Style, Modifier};
-use tui::Frame;
-use tui::backend::Backend;
-use crossterm::{
-    event::{self, Event as CEvent, KeyCode},
+use tui::{
+    Terminal, Frame,
+    widgets::{Widget, Block, Borders, List, Text, Tabs},
+    layout::{Layout, Constraint, Direction, Rect},
+    style::{Color, Style, Modifier},
+    backend::{CrosstermBackend, Backend}
 };
 
 pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
@@ -89,11 +87,21 @@ fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
 fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
+    let playlist_str : &str = "Playlists";
+
     let playlist_block = Block::default()
-    .title(&format!("Playlists"))
-    .title_style(Style::default().fg(Color::Rgb(0, 148, 255)))
     .borders(Borders::ALL)
     .render(f, area);
+
+    let mut items = app.playlist_list.items.iter().map(|i| Text::raw(*(&i.as_str())));
+
+    let mut items2 = List::new(items)
+        .block(Block::default().borders(Borders::ALL)
+        .title(playlist_str)
+        .title_style(Style::default().fg(Color::Rgb(0, 148, 255))));
+
+    f.render(&mut items2, area);
+
 } 
 
 fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
@@ -107,8 +115,8 @@ fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Min(3),
-                Constraint::Length(200),
+                Constraint::Min(3), // playbar 
+                Constraint::Length(200), // main area
             ]
             .as_ref()
         )
@@ -119,7 +127,7 @@ fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 
 }
 
-fn draw_play_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
     let play_block = Block::default()
@@ -128,7 +136,32 @@ fn draw_play_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
     .borders(Borders::ALL)
     .render(f, area);
 
+    let chunks = Layout::default() 
+        .direction(Direction::Horizontal)
+        .constraints(
+            [
+                Constraint::Min(5), // buttons
+                Constraint::Length(100), // track desc
+                Constraint::Min(50), // progress
+            ]
+            .as_ref()
+        )
+        .split(area);
+
+        draw_button_block(f, app, chunks[0]);
+        draw_track_block(f, app, chunks[1]);
+        draw_progress_block(f, app, chunks[2]);
+
 }
+
+fn draw_button_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{}
+
+fn draw_track_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{}
+
+fn draw_progress_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{}
 
 fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {

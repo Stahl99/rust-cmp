@@ -1,20 +1,25 @@
 use crate::util::StatefulList::StatefulList;
+use crate::util::StatefulList::TabsState;
 
 use argh::FromArgs;
 
-pub struct App {
+pub struct App<'a> {
     pub item_list: StatefulList<String>,
     pub view_list: StatefulList<String>,
+    pub playlist_list: StatefulList<String>,
+
+    pub playbar_state: TabsState<'a>,
     pub should_quit: bool,
+
     pub up: bool,
     pub down: bool,
     pub left: bool,
     pub right: bool,
 }
 
-impl App {
+impl<'a> App<'a> {
 
-    pub fn new() -> App {
+    pub fn new() -> App<'a> {
 
         App {
             item_list: StatefulList::with_items(vec![
@@ -24,6 +29,11 @@ impl App {
             view_list: StatefulList::with_items(vec![
                 "Artist".to_string(), "Albums".to_string(), "Tracks".to_string(),
             ]),
+            playlist_list: StatefulList::with_items(vec![
+                "Playlist 1".to_string(), "Playlist 2".to_string(), "Playlist 3".to_string(), "Playlist 4".to_string(), "Playlist 5".to_string(), 
+                "Playlist 6".to_string(), "Playlist 7".to_string(), "Playlist 8".to_string(), "Playlist 9".to_string(), "Playlist 10".to_string(), 
+            ]),
+            playbar_state: TabsState::new(vec!["<<", ">", ">>", "Testtrack", "Testartist"]),
             should_quit: false,
             up: false,
             down: false,
