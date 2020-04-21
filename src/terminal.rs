@@ -107,7 +107,10 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
-    app.playlist_list.calc_on_display(area.height as usize);
+    // this also accounts for horizontal scrolling
+    app.playlist_list.calc_on_display(area.width as usize, area.height as usize, app.horizontal_scroll_delay);
+
+    app.playlist_list.add_highlighting_element("> ");
 
     // get text from all visible list items
     let mut items = app.playlist_list.on_display.iter().map(|i| Text::raw(*(&i.as_str())));
@@ -119,6 +122,8 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
         .title_style(Style::default().fg(app.title_color)));
 
     f.render(&mut render_list, area);
+
+    app.playlist_list.remove_highlighting_element('>');
 
 } 
 
@@ -199,31 +204,6 @@ fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : 
 
 }
 
-// removes the text highlighting element from all list elements passed to the function
-pub fn remove_highlighting_element(list : &mut StatefulList<String>, highlighting_element : char)
-{
-
-    for i in 0..list.items.len() {
-        if list.items[i].chars().nth(0).unwrap() == highlighting_element {
-            list.items[i] = list.items[i][2..].to_string();
-        }
-    }
-
-}
-
-// adds the highlighting element to the currently selected list item
-pub fn add_highlighting_element(list : &mut StatefulList<String>, highlighting_element : &str)
-{
-
-    let selected_element_index : usize = list.state.selected().unwrap();
-    let selected_element : String  = list.items[selected_element_index].to_string();
-
-    let mut concatenated_element : String = highlighting_element.to_owned();
-    concatenated_element = concatenated_element + &selected_element;
-    list.items[selected_element_index] = concatenated_element;
-
-}
-
 // executes the terminal logic 
 pub fn run_terminal (app : &mut App) {
 
@@ -243,14 +223,6 @@ pub fn run_terminal (app : &mut App) {
         app.view_list.all_elements.previous();
         app.playlist_list.all_elements.previous();
     }
-
-    // update the position of the list cursor
-
-    remove_highlighting_element(&mut app.view_list.all_elements, '>');
-    remove_highlighting_element(&mut app.playlist_list.all_elements, '>');
-
-    add_highlighting_element(&mut app.view_list.all_elements, "> ");
-    add_highlighting_element(&mut app.playlist_list.all_elements, "> ");
 
 }
 
