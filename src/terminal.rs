@@ -1,4 +1,5 @@
 use crate::util::app::App;
+use crate::util::StatefulList::StatefulList;
 
 use std::io::{stdout};
 use tui::{
@@ -10,16 +11,19 @@ use tui::{
 };
 
 pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
+
+    // init basic terminal objects
     let stdout = stdout()/*.into_raw_mode()*/;
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend).unwrap();
 
-    terminal.hide_cursor();
-    terminal.clear();
+    terminal.hide_cursor(); // hide cursor
+    terminal.clear(); // clear terminal
     
     return terminal;
 }
 
+// function that initiates calls to all other sub draw functions
 pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, app : &mut App) -> () {
 
         terminal.draw(|mut f| {
@@ -42,6 +46,7 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
 
 }
 
+// draws the sidebar of the UI
 fn draw_sidebar(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
@@ -53,7 +58,7 @@ fn draw_sidebar(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut
         .direction(Direction::Vertical)
         .constraints(
             [
-                Constraint::Min(5), // Views
+                Constraint::Min(3), // Views
                 Constraint::Length(200), // Playlists
             ]
             .as_ref()
@@ -65,45 +70,59 @@ fn draw_sidebar(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut
 
 }
 
+// draws a list of all selectable views
 fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
-    let view_str : &str = "Views";
+    // string that is printed later as a title
+    let rust_cmp_str : &str = "RUST COMMANDLINE MUSIC PLAYER (CMP)";
 
     let view_block = Block::default()
     .borders(Borders::ALL)
     .render(f, area);
 
-    let mut items = app.view_list.items.iter().map(|i| Text::raw(*(&i.as_str())));
+    // get the text from the list
+    let mut items = app.view_list.all_elements.items.iter().map(|i| Text::raw(*(&i.as_str())));
 
-    let mut items2 = List::new(items)
+    // create render object from item list
+    let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
-        .title(view_str)
-        .title_style(Style::default().fg(Color::Rgb(0, 148, 255))));
+        // set the title of the view block
+        .title(rust_cmp_str)
+        .title_style(Style::default().fg(app.header_color)));
 
-    f.render(&mut items2, area);
+    f.render(&mut render_list, area);
 } 
 
+// draws the playlist selection in the sidebar
 fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
+    // string that is printed later as a title
     let playlist_str : &str = "Playlists";
 
     let playlist_block = Block::default()
     .borders(Borders::ALL)
     .render(f, area);
 
-    let mut items = app.playlist_list.items.iter().map(|i| Text::raw(*(&i.as_str())));
+    // calculated the content of the on_display object
+    // which only contains items currently visible in the UI
+    app.playlist_list.calc_on_display(area.height as usize);
 
-    let mut items2 = List::new(items)
+    // get text from all visible list items
+    let mut items = app.playlist_list.on_display.iter().map(|i| Text::raw(*(&i.as_str())));
+
+    let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
+        // set the title of the view block
         .title(playlist_str)
-        .title_style(Style::default().fg(Color::Rgb(0, 148, 255))));
+        .title_style(Style::default().fg(app.title_color)));
 
-    f.render(&mut items2, area);
+    f.render(&mut render_list, area);
 
 } 
 
+// draw the playbar and the main table in the center of the screen
 fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
@@ -127,12 +146,11 @@ fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 
 }
 
+// draw the playbar in the center top of the screen
 fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
     let play_block = Block::default()
-    .title(&format!("RUST CMP"))
-    .title_style(Style::default().fg(Color::Rgb(216, 127, 26)))
     .borders(Borders::ALL)
     .render(f, area);
 
@@ -140,29 +158,38 @@ fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
         .direction(Direction::Horizontal)
         .constraints(
             [
-                Constraint::Min(5), // buttons
-                Constraint::Length(100), // track desc
-                Constraint::Min(50), // progress
+                Constraint::Percentage(50), // tab block
+                Constraint::Percentage(50), // timeline
             ]
             .as_ref()
         )
         .split(area);
 
-        draw_button_block(f, app, chunks[0]);
-        draw_track_block(f, app, chunks[1]);
-        draw_progress_block(f, app, chunks[2]);
+    draw_tab_block(f, app, chunks[0]);
+    draw_timeline_block(f, app, chunks[1]);    
 
 }
 
-fn draw_button_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+// draw tabs used to select buttons at the top of the screen (play/pause etc.)
+fn draw_tab_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    let mut tabs = Tabs::default()
+        .block(Block::default().borders(Borders::ALL))
+        .titles(&app.playbar_state.titles) // set the content of the tabs items
+        .select(app.playbar_state.index) // select an initial item
+        .highlight_style(Style::default().fg(app.title_color)) // color used to highlight selected items
+        .divider(" "); // defines the divider element between the tab elements
+
+    f.render(&mut tabs, area);
+
+}
+
+// draws the timeline in the top right of the screen
+fn draw_timeline_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {}
 
-fn draw_track_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
-{}
-
-fn draw_progress_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
-{}
-
+// draws the big table in the center of the screen used to select music
 fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
@@ -172,32 +199,61 @@ fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : 
 
 }
 
-pub fn run_terminal (app : &mut App) {
+// removes the text highlighting element from all list elements passed to the function
+pub fn remove_highlighting_element(list : &mut StatefulList<String>, highlighting_element : char)
+{
 
-
-    if (app.poll_down()) {
-        app.item_list.next();
-        app.view_list.next();
-    }
-
-    if (app.poll_up()) {
-        app.item_list.previous();
-        app.view_list.previous();
-    }
-
-    // remove "> " from all elements
-    for i in 0..app.view_list.items.len() {
-        if (app.view_list.items[i].chars().nth(0).unwrap() == '>') {
-            app.view_list.items[i] = app.view_list.items[i][2..].to_string();
+    for i in 0..list.items.len() {
+        if list.items[i].chars().nth(0).unwrap() == highlighting_element {
+            list.items[i] = list.items[i][2..].to_string();
         }
     }
 
-    // Add "> " to selected element
-    let mut selected_element_index : usize = app.view_list.state.selected().unwrap();
-    let selected_element : String  = app.view_list.items[selected_element_index].to_string();
+}
 
-    let mut concatenated_element : String = "> ".to_owned();
+// adds the highlighting element to the currently selected list item
+pub fn add_highlighting_element(list : &mut StatefulList<String>, highlighting_element : &str)
+{
+
+    let selected_element_index : usize = list.state.selected().unwrap();
+    let selected_element : String  = list.items[selected_element_index].to_string();
+
+    let mut concatenated_element : String = highlighting_element.to_owned();
     concatenated_element = concatenated_element + &selected_element;
-    app.view_list.items[selected_element_index] = concatenated_element;
+    list.items[selected_element_index] = concatenated_element;
+
+}
+
+// executes the terminal logic 
+pub fn run_terminal (app : &mut App) {
+
+
+    navigation(app);
+
+    // moves cursor in the lists
+
+    if app.poll_down() {
+        app.item_list.all_elements.next();
+        app.view_list.all_elements.next();
+        app.playlist_list.all_elements.next();
+    }
+
+    if app.poll_up() {
+        app.item_list.all_elements.previous();
+        app.view_list.all_elements.previous();
+        app.playlist_list.all_elements.previous();
+    }
+
+    // update the position of the list cursor
+
+    remove_highlighting_element(&mut app.view_list.all_elements, '>');
+    remove_highlighting_element(&mut app.playlist_list.all_elements, '>');
+
+    add_highlighting_element(&mut app.view_list.all_elements, "> ");
+    add_highlighting_element(&mut app.playlist_list.all_elements, "> ");
+
+}
+
+pub fn navigation(app : &mut App) {
 
 }

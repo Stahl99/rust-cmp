@@ -1,9 +1,10 @@
 // +-----------------------------+
 // | from tui-rs repo examples:  |
 // +-----------------------------+
+
 pub struct ListState {
-    offset: usize,
-    selected: Option<usize>,
+    pub offset: usize,
+    pub selected: Option<usize>,
 }
 
 impl Default for ListState {
