@@ -209,7 +209,7 @@ impl ScrollStatus {
 // wrapper struct for StatefulList with the addition of
 // on_display to contain only the currently visible elements for rendering 
 pub struct StatefulSelectedList {
-    on_display : Vec<String>, // all elements currently on display (can be modified (selection, scrolling etc.))
+    pub on_display : Vec<String>, // all elements currently on display (can be modified (selection, scrolling etc.))
     all_elements_scroll_status : Vec<ScrollStatus>, // index of all elements with corresponding scroll status
     all_elements : StatefulList<String>, // all elements in their raw form
     old_height : usize, // used in the calc_on_display function
