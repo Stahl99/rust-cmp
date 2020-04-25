@@ -183,7 +183,9 @@ fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
         .direction(Direction::Horizontal)
         .constraints(
             [
-                Constraint::Percentage(50), // tab block
+                Constraint::Min(15), // tab block
+                Constraint::Percentage(25), // track name
+                Constraint::Percentage(25), // artist name
                 Constraint::Percentage(50), // timeline
             ]
             .as_ref()
@@ -191,7 +193,9 @@ fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
         .split(area);
 
     draw_tab_block(f, app, chunks[0]);
-    draw_timeline_block(f, app, chunks[1]);    
+    draw_track_name_block(f, app, chunks[1]);
+    draw_artist_name_block(f, app, chunks[2]);
+    draw_timeline_block(f, app, chunks[3]);    
 
 }
 
@@ -210,6 +214,70 @@ fn draw_tab_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &m
 
 }
 
+fn draw_track_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+     // string that is printed later as a title
+     let track_name_str : &str = "Currently playing";
+
+    // calculated the content of the on_display object
+    // which only contains items currently visible in the UI
+    // this also accounts for horizontal and vertical scrolling
+    app.track_name_list.calc_on_display(area.width as usize, area.height as usize, app.horizontal_scroll_delay);
+
+    if app.current_element == CurrentElement::TrackName {
+        app.track_name_list.add_highlighting_element("> "); // adds the highlighting element to the selected list element
+    }
+
+    // get text from all visible list items
+    let mut items = app.track_name_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+
+    let mut render_list = List::new(items)
+        .block(Block::default().borders(Borders::ALL)
+        .title(track_name_str)
+        .title_style(Style::default().fg(app.title_color)));
+
+    f.render(&mut render_list, area);
+
+    // removes the highlighting element from the selected list element after rendering
+    if app.current_element == CurrentElement::TrackName {
+        app.track_name_list.remove_highlighting_element('>'); 
+    }
+
+}
+
+fn draw_artist_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+{
+
+    // string that is printed later as a title
+    let artist_name_str : &str = "By";
+
+    // calculated the content of the on_display object
+    // which only contains items currently visible in the UI
+    // this also accounts for horizontal and vertical scrolling
+    app.artist_name_list.calc_on_display(area.width as usize, area.height as usize, app.horizontal_scroll_delay);
+
+    if app.current_element == CurrentElement::ArtistName {
+        app.artist_name_list.add_highlighting_element("> "); // adds the highlighting element to the selected list element
+    }
+
+    // get text from all visible list items
+    let mut items = app.artist_name_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+
+    let mut render_list = List::new(items)
+        .block(Block::default().borders(Borders::ALL)
+        .title(artist_name_str)
+        .title_style(Style::default().fg(app.title_color)));
+
+    f.render(&mut render_list, area);
+
+    // removes the highlighting element from the selected list element after rendering
+    if app.current_element == CurrentElement::ArtistName {
+        app.artist_name_list.remove_highlighting_element('>'); 
+    }
+
+}
+
 // draws the timeline in the top right of the screen
 fn draw_timeline_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
@@ -218,19 +286,20 @@ fn draw_timeline_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app
     .borders(Borders::ALL)
     .render(f, area);
 
-    let mut color = Color::Rgb(0, 95, 210);
+    let mut color = Color::Rgb(0, 95, 210); // default Color for timeline
 
+    // change color of timeline when the it's selected
     if app.current_element == CurrentElement::Timeline {
         color = app.title_color;
     }
 
-    let mut gauge = Gauge::default()
+    let mut timeline = Gauge::default()
                 .block(Block::default().borders(Borders::ALL))
                 .style(Style::default().fg(color))
                 .ratio(app.current_track_progress)
-                .label(&app.track_progress_text)
-                /*.style(Style::default().fg(text_color))*/;
-            f.render(&mut gauge, area);
+                .label(&app.track_progress_text);
+
+    f.render(&mut timeline, area);
 
 }
 
@@ -475,7 +544,7 @@ pub fn terminal_navigation (app : &mut App) {
             if app.playbar_state.index == 0 {
                 app.current_element = CurrentElement::Views;
                 app.view_list.reset_selection();
-                app.playbar_state.index = 5;
+                app.playbar_state.index = 3;
                 return;
             }
 
@@ -483,9 +552,9 @@ pub fn terminal_navigation (app : &mut App) {
         }
 
         if right {
-            if app.playbar_state.index == 4 {
+            if app.playbar_state.index == 2 {
                 app.current_element = CurrentElement::Timeline;
-                app.playbar_state.index = 5;
+                app.playbar_state.index = 3;
                 return;
             }
 
@@ -495,7 +564,7 @@ pub fn terminal_navigation (app : &mut App) {
         if down {
             app.current_element = CurrentElement::MainArea;
             reset_main_area_selection(app);
-            app.playbar_state.index = 5;
+            app.playbar_state.index = 3;
             return;
         }
 
@@ -506,7 +575,7 @@ pub fn terminal_navigation (app : &mut App) {
 
         if left {
             app.current_element = CurrentElement::Playbar;
-            app.playbar_state.index = 4;
+            app.playbar_state.index = 2;
             return;
         }
 

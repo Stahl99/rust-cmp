@@ -16,10 +16,16 @@ pub struct App<'a> {
     pub albums_list: StatefulSelectedList,
     pub lengths_list: StatefulSelectedList,
 
+    // These values are only for internal use
+    pub track_name_list: StatefulSelectedList,
+    pub artist_name_list: StatefulSelectedList,
+
     // the progress of the current song as ratio
     // has to be betwwen 0 and 1
     pub current_track_progress: f64, 
     pub track_progress_text: String, // string displayed in the progress bar
+    pub current_track_name: String,
+    pub current_artist_name: String,
 
     pub current_element: CurrentElement, // currently selected UI block
     pub playbar_state: TabsState<'a>, // currently selected playbar element
@@ -57,7 +63,7 @@ impl<'a> App<'a> {
                  "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
             ]),
             artist_list: StatefulSelectedList::new(vec![
-                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
+                "Item0".to_string(), " ".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
                  "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
             ]),
             albums_list: StatefulSelectedList::new(vec![
@@ -69,12 +75,21 @@ impl<'a> App<'a> {
                  "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
             ]),
 
+            track_name_list: StatefulSelectedList::new(vec![
+                "Test".to_string()
+            ]),
+            artist_name_list: StatefulSelectedList::new(vec![
+                "Test".to_string()
+            ]),
+
             current_track_progress: 0.5,
             track_progress_text: String::from("00 : 00"),
+            current_track_name: String::from("Ein sehr sehr sehr langer Testtrackname"),
+            current_artist_name: String::from("Ein sehr sehr sehr langer Artistname"),
 
             current_element: CurrentElement::Playlists,
             // last element is empty so that it can be selected when no element of the tabs should be selected
-            playbar_state: TabsState::new(vec!["<<", ">", ">>", "Testtrack-Testtrack-Testtrack", "Testartist"]), 
+            playbar_state: TabsState::new(vec!["<<", ">", ">>"]), 
             should_quit: false,
 
             up: false,
@@ -86,7 +101,7 @@ impl<'a> App<'a> {
             title_color: Color::Rgb(0, 148, 255),
         };
 
-        app.playbar_state.index = 5; // 5 = empty tab -> nothing is visibly selected
+        app.playbar_state.index = 3; // 3 = empty tab -> nothing is visibly selected
 
         // Select first element
         app.view_list.all_elements.state.select(Some(0));
@@ -95,6 +110,13 @@ impl<'a> App<'a> {
         app.artist_list.all_elements.state.select(Some(0));
         app.albums_list.all_elements.state.select(Some(0));
         app.lengths_list.all_elements.state.select(Some(0));
+
+        // set artist and track name
+        app.set_track_name(app.current_track_name.clone());
+        app.set_artist_name(app.current_artist_name.clone());
+
+        app.track_name_list.all_elements.state.select(Some(0));
+        app.artist_name_list.all_elements.state.select(Some(0));
 
         return app;
     }
@@ -139,6 +161,14 @@ impl<'a> App<'a> {
         return false;
     }
 
+    pub fn set_track_name (&mut self, new_track_name : String) {
+        self.track_name_list.change_elements(StatefulList::with_items(vec![new_track_name]));
+    }
+
+    pub fn set_artist_name (&mut self, new_artist_name : String) {
+        self.artist_name_list.change_elements(StatefulList::with_items(vec![new_artist_name]));
+    }
+
 }
 
 // this enum is used as a type to tell which part of the
@@ -148,6 +178,8 @@ pub enum CurrentElement {
     Views,
     Playlists,
     Playbar,
+    TrackName,
+    ArtistName,
     Timeline,
     MainArea,
 }
@@ -191,16 +223,13 @@ impl StatefulSelectedList {
         let mut list = StatefulSelectedList {
             on_display: Vec::new(),
             all_elements_scroll_status: Vec::with_capacity(content.capacity()),
-            all_elements: StatefulList::with_items(content),
+            all_elements: StatefulList::new(),
             old_height: 0,
             horizontal_tick_counter: 0,
             selected_element_index_in_on_display: 0
         };
 
-        // init list with indicies and 0 as scroll status
-        for i in 0..list.all_elements.items.len() {
-            list.all_elements_scroll_status.push(ScrollStatus::new(i, 0));
-        }
+        list.change_elements(StatefulList::with_items(content));
 
         return list;
     }
@@ -251,6 +280,15 @@ impl StatefulSelectedList {
             self.all_elements_scroll_status.push(ScrollStatus::new(i, 0));
         }
 
+        // reset selection
+        self.reset_selection();
+
+        // add " " to the back of all elements
+        for i in 0..self.all_elements.items.len() {
+            let element : String  = self.all_elements.items[i].to_string() + " ";
+            self.all_elements.items[i] = element;
+        }
+
     }
 
     pub fn get_on_display(&mut self) -> &Vec<String> {
@@ -290,6 +328,7 @@ impl StatefulSelectedList {
         self.on_display = Vec::with_capacity(list_height);
 
         self.calc_vertical_scrolling(list_height); // calculate the vertical scrolling
+
         self.recover_scroll_status(); // because on_display has been reset the scroll_status of element in on_display has to be recovered
         self.calc_horizontal_scrolling(list_width, horizontal_scroll_delay); // calculated the horizontal scrolling
 
