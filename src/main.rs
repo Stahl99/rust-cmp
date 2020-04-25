@@ -56,7 +56,7 @@ fn main() {
 
         terminal::draw_terminal(&mut terminal, &mut app); // draw the UI
         handle_user_input(&mut app, &mut terminal, &rx); // handle user input
-        terminal::run_terminal(&mut app); // execute the terminal logic
+        terminal::terminal_navigation(&mut app); // handle the terminal navigation
 
     }
 

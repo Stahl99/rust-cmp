@@ -9,9 +9,12 @@ pub struct App<'a> {
     pub horizontal_scroll_delay: u16,
 
     // used to hold the contents of the UI lists
-    pub item_list: StatefulSelectedList,
     pub view_list: StatefulSelectedList,
     pub playlist_list: StatefulSelectedList,
+    pub tracks_list: StatefulSelectedList,
+    pub artist_list: StatefulSelectedList,
+    pub albums_list: StatefulSelectedList,
+    pub lengths_list: StatefulSelectedList,
 
     pub current_element: CurrentElement, // currently selected UI block
     pub playbar_state: TabsState<'a>, // currently selected playbar element
@@ -36,10 +39,6 @@ impl<'a> App<'a> {
         let mut app = App {
             horizontal_scroll_delay: 1,
 
-            item_list: StatefulSelectedList::new(vec![
-                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
-                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
-            ]),
             view_list: StatefulSelectedList::new(vec![
                 "Show Tracks".to_string(),
             ]),
@@ -48,10 +47,26 @@ impl<'a> App<'a> {
                 "Playlist 6".to_string(), "Playlist 7".to_string(), "Noch ein extraordinär langer String".to_string(), "Playlist 9".to_string(), "Playlist 10".to_string(), 
                 "Playlist 11".to_string(), "Playlist 12".to_string(), "Playlist 13".to_string(), "Playlist 14".to_string(), "Playlist 15".to_string(), 
             ]),
+            tracks_list: StatefulSelectedList::new(vec![
+                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
+                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
+            ]),
+            artist_list: StatefulSelectedList::new(vec![
+                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
+                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
+            ]),
+            albums_list: StatefulSelectedList::new(vec![
+                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
+                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
+            ]),
+            lengths_list: StatefulSelectedList::new(vec![
+                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
+                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
+            ]),
 
-            current_element: CurrentElement::Views,
+            current_element: CurrentElement::Playlists,
             // last element is empty so that it can be selected when no element of the tabs should be selected
-            playbar_state: TabsState::new(vec!["<<", ">", ">>", "Testtrack", "Testartist", ""]), 
+            playbar_state: TabsState::new(vec!["<<", ">", ">>", "Testtrack", "Testartist"]), 
             should_quit: false,
 
             up: false,
@@ -63,12 +78,15 @@ impl<'a> App<'a> {
             title_color: Color::Rgb(0, 148, 255),
         };
 
-        app.playbar_state.index = 6; // 6 = empty tab -> nothing is visibly selected
+        app.playbar_state.index = 5; // 5 = empty tab -> nothing is visibly selected
 
         // Select first element
-        app.item_list.all_elements.state.select(Some(0));
         app.view_list.all_elements.state.select(Some(0));
         app.playlist_list.all_elements.state.select(Some(0));
+        app.tracks_list.all_elements.state.select(Some(0));
+        app.artist_list.all_elements.state.select(Some(0));
+        app.albums_list.all_elements.state.select(Some(0));
+        app.lengths_list.all_elements.state.select(Some(0));
 
         return app;
     }
@@ -117,12 +135,19 @@ impl<'a> App<'a> {
 
 // this enum is used as a type to tell which part of the
 // UI is currently selected
+#[derive(PartialEq)]
 pub enum CurrentElement {
     Views,
     Playlists,
     Playbar,
     Timeline,
     MainArea,
+}
+
+impl CurrentElement {
+    fn eq(&self, other: &Self) -> bool {
+        self == other
+    }
 }
 
 pub struct ScrollStatus {
@@ -182,6 +207,26 @@ impl StatefulSelectedList {
 
     pub fn get_elements(&mut self) -> &StatefulList<String> {
         &self.all_elements
+    }
+
+    pub fn is_first_element_selected(&mut self) -> bool {
+        if self.all_elements.state.selected() == Some(0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    pub fn is_last_element_selected(&mut self) -> bool {
+        if self.all_elements.state.selected() == Some(self.all_elements.items.len()-1) {
+            return true;
+        }
+
+        return false;
+    }
+
+    pub fn reset_selection (&mut self) {
+        self.all_elements.state.select(Some(0));
     }
 
     // function used to change elements of the list
