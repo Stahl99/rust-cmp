@@ -16,6 +16,11 @@ pub struct App<'a> {
     pub albums_list: StatefulSelectedList,
     pub lengths_list: StatefulSelectedList,
 
+    // the progress of the current song as ratio
+    // has to be betwwen 0 and 1
+    pub current_track_progress: f64, 
+    pub track_progress_text: String, // string displayed in the progress bar
+
     pub current_element: CurrentElement, // currently selected UI block
     pub playbar_state: TabsState<'a>, // currently selected playbar element
     pub should_quit: bool, // if set to true the programm exits
@@ -64,9 +69,12 @@ impl<'a> App<'a> {
                  "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
             ]),
 
+            current_track_progress: 0.5,
+            track_progress_text: String::from("00 : 00"),
+
             current_element: CurrentElement::Playlists,
             // last element is empty so that it can be selected when no element of the tabs should be selected
-            playbar_state: TabsState::new(vec!["<<", ">", ">>", "Testtrack", "Testartist"]), 
+            playbar_state: TabsState::new(vec!["<<", ">", ">>", "Testtrack-Testtrack-Testtrack", "Testartist"]), 
             should_quit: false,
 
             up: false,

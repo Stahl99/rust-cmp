@@ -4,7 +4,7 @@ use crate::util::app::CurrentElement;
 use std::io::{stdout};
 use tui::{
     Terminal, Frame,
-    widgets::{Widget, Block, Borders, List, Text, Tabs},
+    widgets::{Widget, Block, Borders, List, Text, Tabs, Gauge},
     layout::{Layout, Constraint, Direction, Rect},
     style::{Color, Style, Modifier},
     backend::{CrosstermBackend, Backend}
@@ -212,7 +212,27 @@ fn draw_tab_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &m
 
 // draws the timeline in the top right of the screen
 fn draw_timeline_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
-{}
+{
+
+    let timeline_block = Block::default()
+    .borders(Borders::ALL)
+    .render(f, area);
+
+    let mut color = Color::Rgb(0, 95, 210);
+
+    if app.current_element == CurrentElement::Timeline {
+        color = app.title_color;
+    }
+
+    let mut gauge = Gauge::default()
+                .block(Block::default().borders(Borders::ALL))
+                .style(Style::default().fg(color))
+                .ratio(app.current_track_progress)
+                .label(&app.track_progress_text)
+                /*.style(Style::default().fg(text_color))*/;
+            f.render(&mut gauge, area);
+
+}
 
 // draws the big table in the center of the screen used to select music
 fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
@@ -486,7 +506,7 @@ pub fn terminal_navigation (app : &mut App) {
 
         if left {
             app.current_element = CurrentElement::Playbar;
-            app.playbar_state.index = 0;
+            app.playbar_state.index = 4;
             return;
         }
 
