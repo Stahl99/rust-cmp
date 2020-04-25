@@ -50,7 +50,6 @@ fn main() {
 
     // create app with basic values
     let mut app = App::new();
-    init_app(&mut app);
 
     // main program loop
     while !app.should_quit {
@@ -64,17 +63,6 @@ fn main() {
     // clear the terminal before exiting the program
     terminal.clear();
 
-}
-
-// inits some app elements
-// TODO: move to app.rs
-fn init_app (app : &mut App)
-{
-    app.playbar_state.index = 6; // 6 = empty tab -> nothing is visibly selected
-
-    app.item_list.all_elements.state.select(Some(0));
-    app.view_list.all_elements.state.select(Some(0));
-    app.playlist_list.all_elements.state.select(Some(0));
 }
 
 // handles the user input for the app

@@ -81,8 +81,15 @@ fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
     .borders(Borders::ALL)
     .render(f, area);
 
-    // get the text from the list
-    let mut items = app.view_list.all_elements.items.iter().map(|i| Text::raw(*(&i.as_str())));
+    // calculated the content of the on_display object
+    // which only contains items currently visible in the UI
+    // this also accounts for horizontal and vertical scrolling
+    app.view_list.calc_on_display(area.width as usize, area.height as usize, app.horizontal_scroll_delay);
+
+    app.view_list.add_highlighting_element("> "); // adds the highlighting element to the selected list element
+
+    // get text from all visible list items
+    let mut items = app.view_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     // create render object from item list
     let mut render_list = List::new(items)
@@ -92,6 +99,10 @@ fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
         .title_style(Style::default().fg(app.header_color)));
 
     f.render(&mut render_list, area);
+
+    // removes the highlighting element from the selected list element after rendering
+    app.view_list.remove_highlighting_element('>'); 
+
 } 
 
 // draws the playlist selection in the sidebar
@@ -107,13 +118,13 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
-    // this also accounts for horizontal scrolling
+    // this also accounts for horizontal and vertical scrolling
     app.playlist_list.calc_on_display(area.width as usize, area.height as usize, app.horizontal_scroll_delay);
 
-    app.playlist_list.add_highlighting_element("> ");
+    app.playlist_list.add_highlighting_element("> "); // adds the highlighting element to the selected list element
 
     // get text from all visible list items
-    let mut items = app.playlist_list.on_display.iter().map(|i| Text::raw(*(&i.as_str())));
+    let mut items = app.playlist_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -123,7 +134,8 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 
     f.render(&mut render_list, area);
 
-    app.playlist_list.remove_highlighting_element('>');
+    // removes the highlighting element from the selected list element after rendering
+    app.playlist_list.remove_highlighting_element('>'); 
 
 } 
 
@@ -213,15 +225,15 @@ pub fn run_terminal (app : &mut App) {
     // moves cursor in the lists
 
     if app.poll_down() {
-        app.item_list.all_elements.next();
-        app.view_list.all_elements.next();
-        app.playlist_list.all_elements.next();
+        app.item_list.next();
+        app.view_list.next();
+        app.playlist_list.next();
     }
 
     if app.poll_up() {
-        app.item_list.all_elements.previous();
-        app.view_list.all_elements.previous();
-        app.playlist_list.all_elements.previous();
+        app.item_list.previous();
+        app.view_list.previous();
+        app.playlist_list.previous();
     }
 
 }
