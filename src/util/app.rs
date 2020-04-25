@@ -24,8 +24,6 @@ pub struct App<'a> {
     // has to be betwwen 0 and 1
     pub current_track_progress: f64, 
     pub track_progress_text: String, // string displayed in the progress bar
-    pub current_track_name: String,
-    pub current_artist_name: String,
 
     pub current_element: CurrentElement, // currently selected UI block
     pub playbar_state: TabsState<'a>, // currently selected playbar element
@@ -84,9 +82,7 @@ impl<'a> App<'a> {
 
             current_track_progress: 0.5,
             track_progress_text: String::from("00 : 00"),
-            current_track_name: String::from("Ein sehr sehr sehr langer Testtrackname"),
-            current_artist_name: String::from("Ein sehr sehr sehr langer Artistname"),
-
+            
             current_element: CurrentElement::Playlists,
             // last element is empty so that it can be selected when no element of the tabs should be selected
             playbar_state: TabsState::new(vec!["<<", ">", ">>"]), 
@@ -112,8 +108,8 @@ impl<'a> App<'a> {
         app.lengths_list.all_elements.state.select(Some(0));
 
         // set artist and track name
-        app.set_track_name(app.current_track_name.clone());
-        app.set_artist_name(app.current_artist_name.clone());
+        app.set_track_name(String::from("Ein sehr sehr sehr langer Testtrackname"));
+        app.set_artist_name(String::from("Ein sehr sehr sehr langer Artistname"));
 
         app.track_name_list.all_elements.state.select(Some(0));
         app.artist_name_list.all_elements.state.select(Some(0));
@@ -162,6 +158,7 @@ impl<'a> App<'a> {
     }
 
     pub fn set_track_name (&mut self, new_track_name : String) {
+
         self.track_name_list.change_elements(StatefulList::with_items(vec![new_track_name]));
     }
 
