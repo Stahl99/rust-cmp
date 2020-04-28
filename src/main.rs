@@ -1,5 +1,9 @@
 mod terminal;
 mod util;
+mod player_interface;
+mod player;
+
+use player_interface::PlayerInterface;
 
 use crate::util::{
     app::App,
@@ -51,11 +55,15 @@ fn main() {
     // create app with basic values
     let mut app = App::new();
 
+    // create instance of player interface and initialize playlist view
+    let mut player_interface = PlayerInterface::new();
+    player_interface.initialize(&mut app);
+
     // main program loop
     while !app.should_quit {
 
         terminal::draw_terminal(&mut terminal, &mut app); // draw the UI
-        handle_user_input(&mut app, &mut terminal, &rx); // handle user input
+        handle_user_input(&mut app, &mut terminal, &rx, &mut player_interface); // handle user input
         terminal::terminal_navigation(&mut app); // handle the terminal navigation
 
     }
@@ -66,7 +74,7 @@ fn main() {
 }
 
 // handles the user input for the app
-fn handle_user_input (app : &mut App, terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, rx : &Receiver<Event<crossterm::event::KeyEvent>>)
+fn handle_user_input (mut app : &mut App, terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, rx : &Receiver<Event<crossterm::event::KeyEvent>>, player_interface : &mut PlayerInterface)
 {
     match rx.recv() {
         Ok(Event::Input(event)) => match event.code {
@@ -83,6 +91,11 @@ fn handle_user_input (app : &mut App, terminal : &mut Terminal<CrosstermBackend<
             KeyCode::Up => app.up = true,
             KeyCode::Right => app.right = true,
             KeyCode::Down => app.down = true,
+
+            // check for the Enter key and start the
+            // requested action
+            KeyCode::Enter => player_interface.user_action(&mut app),
+
             _ => {}
         },
 

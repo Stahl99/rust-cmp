@@ -243,6 +243,10 @@ impl StatefulSelectedList {
         &self.all_elements
     }
 
+    pub fn get_selected_element(&mut self) -> &std::string::String {
+        return &self.on_display[self.selected_element_index_in_on_display];
+    }
+
     pub fn is_first_element_selected(&mut self) -> bool {
         if self.all_elements.state.selected() == Some(0) {
             return true;
