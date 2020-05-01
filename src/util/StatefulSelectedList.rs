@@ -124,6 +124,11 @@ impl StatefulSelectedList {
         &self.on_display
     }
 
+    // returns the on screen selected element
+    pub fn get_selected_element(&mut self) -> &std::string::String {
+        return &self.on_display[self.selected_element_index_in_on_display];
+    }
+
     // removes the text highlighting element from all list elements passed to the function
     pub fn remove_highlighting_element(&mut self, highlighting_element : char) {
 
