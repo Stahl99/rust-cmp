@@ -1,5 +1,5 @@
 use crate::util::app::App;
-use crate::util::app::CurrentElement;
+use crate::util::StatefulSelectedList::CurrentElement;
 
 use std::io::{stdout};
 use tui::{
