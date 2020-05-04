@@ -95,7 +95,7 @@ impl Player {
     }
 
     // get all song objects in a playlist
-    pub fn get_all_songs_in_playlist(&mut self, playlist_name: String) -> Vec<Song> {
+    pub fn get_all_songs_in_playlist(&mut self, playlist_name: &String) -> Vec<Song> {
         self.client.playlist(playlist_name).unwrap()
     }
 
@@ -174,7 +174,7 @@ impl Player {
 }
 
 // get a String containing the album from a song object
-pub fn get_album_from_song(song: Song) -> String {
+pub fn get_album_from_song(song: &Song) -> String {
     if song.tags.get("album").is_some() {
         let album: &String = song.tags.get("album").unwrap();
         album.to_owned()
@@ -186,7 +186,7 @@ pub fn get_album_from_song(song: Song) -> String {
 }
 
 // get a String containing the artist from a song object
-pub fn get_artist_from_song(song: Song) -> String {
+pub fn get_artist_from_song(song: &Song) -> String {
     if song.tags.get("artist").is_some() {
         let artist: &String = song.tags.get("artist").unwrap();
         artist.to_owned()
@@ -197,6 +197,6 @@ pub fn get_artist_from_song(song: Song) -> String {
 }
 
 // get the duration of the song in seconds
-pub fn get_duration_from_song(song: Song) -> i64 {
+pub fn get_duration_from_song(song: &Song) -> i64 {
     song.duration.unwrap().num_seconds()
 }
