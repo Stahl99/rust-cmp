@@ -49,6 +49,15 @@ impl Player {
         }
     }
 
+    pub fn toggle_play_pause(& mut self) {
+        if self.client.status().unwrap().state == State::Pause {
+            self.play();
+        }
+        else if self.client.status().unwrap().state == State::Play {
+            self.pause();
+        }
+    }
+
     // clears current queue
     pub fn clear_queue(&mut self) {
         self.client.clear().unwrap();
@@ -75,7 +84,7 @@ impl Player {
     }
 
     // get all titles in a specific playlist
-    pub fn get_all_titles_in_playlist(& mut self, playlist_name: String) -> Vec<String> {
+    pub fn get_all_titles_in_playlist(& mut self, playlist_name: &String) -> Vec<String> {
         let songs = self.client.playlist(playlist_name).unwrap();
         let mut ret_songs: Vec<String> = Vec::new();
         for song in songs {
@@ -154,7 +163,7 @@ impl Player {
     }
 
     // loads a playlist into the queue
-    pub fn load_playlist (&mut self, playlist_name: String) {
+    pub fn load_playlist (&mut self, playlist_name: &String) {
         self.client.load(playlist_name, ..).unwrap();
     }
 }
