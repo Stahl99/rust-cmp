@@ -39,7 +39,7 @@ impl PlayerInterface {
             for i in 0..songs_list.len() {
                 albums_vec[i] = player::get_album_from_song(&songs_list[i]);
                 artists_vec[i] = player::get_artist_from_song(&songs_list[i]);
-                duration_vec[i] = player::get_duration_from_song(&songs_list[i]).to_string();
+                duration_vec[i] = PlayerInterface::transform_to_time_string(player::get_duration_from_song(&songs_list[i]));
             }
             let track_stateful_list = StatefulList::with_items(track_list);
             let albums_stateful_list = StatefulList::with_items(albums_vec);
@@ -88,6 +88,17 @@ impl PlayerInterface {
         let duration = player::get_duration_from_song(&song);
         let fraction: f64 = 1.0 / duration as f64;
         app.current_track_progress = fraction * self.music_player.get_elapsed() as f64;
-        app.track_progress_text = duration.to_string();
+        app.track_progress_text = PlayerInterface::transform_to_time_string(self.music_player.get_elapsed())
+    }
+
+    fn transform_to_time_string(seconds_input: i64) -> String {
+        let mut seconds = seconds_input.clone();
+        let mut minutes: i64 = 0;
+        while seconds >= 60 {
+            minutes += 1;
+            seconds -= 60;
+        }
+        let time_string = minutes.to_string() + ":" + &seconds.to_string();
+        return time_string;
     }
 }
