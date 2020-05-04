@@ -65,7 +65,7 @@ fn main() {
         terminal::draw_terminal(&mut terminal, &mut app); // draw the UI
         handle_user_input(&mut app, &mut terminal, &rx, &mut player_interface); // handle user input
         terminal::terminal_navigation(&mut app); // handle the terminal navigation
-
+        player_interface.update_meta_display(&mut app); // update display of title and artist
     }
 
     // clear the terminal before exiting the program

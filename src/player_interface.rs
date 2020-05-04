@@ -2,6 +2,7 @@ use crate::util::app;
 use crate::util::StatefulList::StatefulList;
 use crate::util::StatefulSelectedList::CurrentElement;
 use crate::player::Player;
+use crate::player;
 
 pub struct PlayerInterface {
     music_player: Player,
@@ -31,29 +32,58 @@ impl PlayerInterface {
         if current_block.eq(&CurrentElement::Playlists) {
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
             let track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
+            let songs_list = &self.music_player.get_all_songs_in_playlist(&self.playlist_name);
+            let mut albums_vec = Vec::<String>::new();
+            let mut artists_vec = Vec::<String>::new();
+            let mut duration_vec = Vec::<String>::new();
+            for i in 0..songs_list.len() {
+                albums_vec[i] = player::get_album_from_song(&songs_list[i]);
+                artists_vec[i] = player::get_artist_from_song(&songs_list[i]);
+                duration_vec[i] = player::get_duration_from_song(&songs_list[i]).to_string();
+            }
             let track_stateful_list = StatefulList::with_items(track_list);
+            let albums_stateful_list = StatefulList::with_items(albums_vec);
+            let artists_stateful_list = StatefulList::with_items(artists_vec);
+            let durations_stateful_list = StatefulList::with_items(duration_vec);
             app.tracks_list.change_elements(track_stateful_list);
+            app.albums_list.change_elements(albums_stateful_list);
+            app.artist_list.change_elements(artists_stateful_list);
+            app.lengths_list.change_elements(durations_stateful_list);
+        }
+
         // If main area is active, the playlist is loaded
         // into the queue and the selected song should be played
-        } else if current_block.eq(&CurrentElement::MainArea) {
+        else if current_block.eq(&CurrentElement::MainArea) {
             let track_name = app.playlist_list.get_selected_element();
             self.music_player.clear_queue();
             self.music_player.load_playlist(&self.playlist_name);
             while self.music_player.get_current_song_title() != track_name.to_string() {
                 self.music_player.next_song();
             }
-            let title = track_name.to_string();
-            app.set_track_name(title);
             self.music_player.play();
+        }
+
         // If playbar controls are active, send the user action
         // to the player
-        } else if current_block.eq(&CurrentElement::Playbar) {
+        else if current_block.eq(&CurrentElement::Playbar) {
             match app.playbar_state.index {
-                0 => self.music_player.prev_song(),
-                1 => self.music_player.toggle_play_pause(),
-                2 => self.music_player.next_song(),
+                0 => {  
+                    self.music_player.prev_song();
+                },
+                1 => {
+                    self.music_player.toggle_play_pause();
+                },
+                2 => {
+                    self.music_player.next_song();
+                },
                 _ => {}
             }
         }
+    }
+
+    pub fn update_meta_display (&mut self, app: &mut app::App) {
+        let song = self.music_player.get_current_song();
+        app.set_artist_name(player::get_artist_from_song(&song));
+        app.set_track_name(self.music_player.get_current_song_title());
     }
 }
