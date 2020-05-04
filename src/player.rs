@@ -49,15 +49,6 @@ impl Player {
         }
     }
 
-    // toggle playback play/pause
-    pub fn toggle_play_pause(& mut self) {
-        if self.client.status().unwrap().state == State::Play {
-            self.client.toggle_pause().unwrap();
-        } else {
-            self.client.play().unwrap();
-        }
-    }
-
     // clears current queue
     pub fn clear_queue(&mut self) {
         self.client.clear().unwrap();
@@ -84,7 +75,7 @@ impl Player {
     }
 
     // get all titles in a specific playlist
-    pub fn get_all_titles_in_playlist(& mut self, playlist_name: &String) -> Vec<String> {
+    pub fn get_all_titles_in_playlist(& mut self, playlist_name: String) -> Vec<String> {
         let songs = self.client.playlist(playlist_name).unwrap();
         let mut ret_songs: Vec<String> = Vec::new();
         for song in songs {
@@ -163,7 +154,35 @@ impl Player {
     }
 
     // loads a playlist into the queue
-    pub fn load_playlist (&mut self, playlist_name: &String) {
+    pub fn load_playlist (&mut self, playlist_name: String) {
         self.client.load(playlist_name, ..).unwrap();
     }
+}
+
+// get a String containing the album from a song object
+pub fn get_album_from_song(song: Song) -> String {
+    if song.tags.get("album").is_some() {
+        let album: &String = song.tags.get("album").unwrap();
+        album.to_owned()
+    }
+    else {
+        String::from("unknown album")
+    }
+    
+}
+
+// get a String containing the artist from a song object
+pub fn get_artist_from_song(song: Song) -> String {
+    if song.tags.get("artist").is_some() {
+        let artist: &String = song.tags.get("artist").unwrap();
+        artist.to_owned()
+    }
+    else {
+        String::from("unknwon artist")
+    }
+}
+
+// get the duration of the song in seconds
+pub fn get_duration_from_song(song: Song) -> i64 {
+    song.duration.unwrap().num_seconds()
 }
