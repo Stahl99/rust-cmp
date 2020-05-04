@@ -85,5 +85,9 @@ impl PlayerInterface {
         let song = self.music_player.get_current_song();
         app.set_artist_name(player::get_artist_from_song(&song));
         app.set_track_name(self.music_player.get_current_song_title());
+        let duration = player::get_duration_from_song(&song);
+        let fraction: f64 = 1.0 / duration as f64;
+        app.current_track_progress = fraction * self.music_player.get_elapsed() as f64;
+        app.track_progress_text = duration.to_string();
     }
 }
