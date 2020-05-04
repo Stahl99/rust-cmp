@@ -166,6 +166,11 @@ impl Player {
     pub fn load_playlist (&mut self, playlist_name: &String) {
         self.client.load(playlist_name, ..).unwrap();
     }
+
+    // get elapsed time of currently playing song in seconds
+    pub fn get_elapsed(& mut self) -> i64 {
+        self.client.status().unwrap().elapsed.unwrap().num_seconds()
+    }
 }
 
 // get a String containing the album from a song object
