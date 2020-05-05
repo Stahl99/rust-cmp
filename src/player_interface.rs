@@ -7,6 +7,7 @@ use crate::player;
 pub struct PlayerInterface {
     music_player: Player,
     playlist_name: String,
+    playing: bool,
 }
 
 impl PlayerInterface {
@@ -15,6 +16,7 @@ impl PlayerInterface {
         PlayerInterface {
             music_player: Player::default(),
             playlist_name: "".to_string(),
+            playing: false,
         }
     }
 
@@ -61,6 +63,7 @@ impl PlayerInterface {
                 self.music_player.next_song();
             }
             self.music_player.play();
+            self.playing = true;
         }
 
         // If playbar controls are active, send the user action
@@ -82,13 +85,15 @@ impl PlayerInterface {
     }
 
     pub fn update_meta_display (&mut self, app: &mut app::App) {
-        let song = self.music_player.get_current_song();
-        app.set_artist_name(player::get_artist_from_song(&song));
-        app.set_track_name(self.music_player.get_current_song_title());
-        let duration = player::get_duration_from_song(&song);
-        let fraction: f64 = 1.0 / duration as f64;
-        app.current_track_progress = fraction * self.music_player.get_elapsed() as f64;
-        app.track_progress_text = PlayerInterface::transform_to_time_string(self.music_player.get_elapsed())
+        if self.playing {
+            let song = self.music_player.get_current_song();
+            app.set_artist_name(player::get_artist_from_song(&song));
+            app.set_track_name(self.music_player.get_current_song_title());
+            let duration = player::get_duration_from_song(&song);
+            let fraction: f64 = 1.0 / duration as f64;
+            app.current_track_progress = fraction * self.music_player.get_elapsed() as f64;
+            app.track_progress_text = PlayerInterface::transform_to_time_string(self.music_player.get_elapsed());
+        }
     }
 
     fn transform_to_time_string(seconds_input: i64) -> String {
