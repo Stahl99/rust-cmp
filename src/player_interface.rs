@@ -7,6 +7,7 @@ use crate::player;
 pub struct PlayerInterface {
     music_player: Player,
     playlist_name: String,
+    playlist_length: u32,
     playing: bool,
 }
 
@@ -15,6 +16,7 @@ impl PlayerInterface {
         PlayerInterface {
             music_player: Player::default(),
             playlist_name: "".to_string(),
+            playlist_length: 0,
             playing: false,
         }
     }
@@ -35,6 +37,7 @@ impl PlayerInterface {
         if current_block.eq(&CurrentElement::Playlists) {
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
             let track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
+            self.playlist_length = track_list.len() as u32;
             let songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
             let len = songs_list.len();
 
@@ -64,9 +67,16 @@ impl PlayerInterface {
         else if current_block.eq(&CurrentElement::MainArea) {
             let track_name = app.tracks_list.get_selected_element();
             self.music_player.clear_queue();
-            self.music_player.load_playlist(&self.playlist_name);
-            while self.music_player.get_current_song_title() != track_name.to_string() {
-                self.music_player.next_song();
+            self.music_player.load_playlist(&self.playlist_name, self.playlist_length);
+            
+            while true {
+                let tmp = self.music_player.get_current_song_title();
+                if tmp != track_name.to_string() {
+                    self.music_player.next_song();
+                }
+                else {
+                    break;
+                }
             }
             self.music_player.play();
             self.playing = true;

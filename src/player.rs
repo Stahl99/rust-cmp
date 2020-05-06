@@ -132,9 +132,14 @@ impl Player {
 
     // get title of current song
     pub fn get_current_song_title(&mut self) -> String {
-        let song: Song = self.client.currentsong().unwrap().unwrap();
         let song_title: String;
-        song_title = song.title.unwrap();
+        if self.client.currentsong().unwrap().is_some() {
+            let song: Song = self.client.currentsong().unwrap().unwrap();
+            song_title = song.title.unwrap();
+        } else
+        {
+            song_title = String::from("unknown title");
+        }
         
         song_title
     }
@@ -159,12 +164,19 @@ impl Player {
 
     // get Song object of current song
     pub fn get_current_song(&mut self) -> Song {
-        self.client.currentsong().unwrap().unwrap()
+        if self.client.currentsong().unwrap().is_some() {
+            self.client.currentsong().unwrap().unwrap()
+        } else
+        {
+            panic!();
+        }
+
     }
 
     // loads a playlist into the queue
-    pub fn load_playlist (&mut self, playlist_name: &String) {
-        self.client.load(playlist_name.trim(), ..).unwrap();
+    pub fn load_playlist (&mut self, playlist_name: &String, end: u32) {
+        let name = playlist_name.trim();
+        self.client.load(name, 0..end).unwrap();
     }
 
     // get elapsed time of currently playing song in seconds
