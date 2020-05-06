@@ -20,6 +20,8 @@ impl PlayerInterface {
         }
     }
 
+    // Displays the playlists stored in the mpd server
+    // Should be called once at application startup
     pub fn initialize (&mut self, app : &mut app::App) {
         let playlist_list = self.music_player.get_all_playlist_names();
         let playlist_stateful_list = StatefulList::with_items(playlist_list);
@@ -34,10 +36,14 @@ impl PlayerInterface {
         if current_block.eq(&CurrentElement::Playlists) {
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
             let track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
-            let songs_list = &self.music_player.get_all_songs_in_playlist(&self.playlist_name);
-            let mut albums_vec = Vec::<String>::new();
-            let mut artists_vec = Vec::<String>::new();
-            let mut duration_vec = Vec::<String>::new();
+            let songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
+
+            // Create vectors to store track data
+            let mut albums_vec = Vec::<String>::with_capacity(songs_list.len());
+            let mut artists_vec = Vec::<String>::with_capacity(songs_list.len());
+            let mut duration_vec = Vec::<String>::with_capacity(songs_list.len());
+
+            // Fill the vectors with values retrieved from the player
             for i in 0..songs_list.len() {
                 albums_vec[i] = player::get_album_from_song(&songs_list[i]);
                 artists_vec[i] = player::get_artist_from_song(&songs_list[i]);
@@ -84,6 +90,7 @@ impl PlayerInterface {
         }
     }
 
+    // Updates the UI with playback information (Title, Artist, Playback Position)
     pub fn update_meta_display (&mut self, app: &mut app::App) {
         if self.playing {
             let song = self.music_player.get_current_song();
@@ -96,6 +103,8 @@ impl PlayerInterface {
         }
     }
 
+    // Converts an integer value of seconds to a time string
+    // * m:ss
     fn transform_to_time_string(seconds_input: i64) -> String {
         let mut seconds = seconds_input.clone();
         let mut minutes: i64 = 0;
