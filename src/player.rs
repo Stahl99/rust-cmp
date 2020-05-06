@@ -85,7 +85,6 @@ impl Player {
 
     // get all titles in a specific playlist
     pub fn get_all_titles_in_playlist(& mut self, playlist_name: &String) -> Vec<String> {
-        self.client.update().unwrap();
         let songs = self.client.playlist(playlist_name.trim()).unwrap();
         let mut ret_songs: Vec<String> = Vec::new();
         for song in songs {
@@ -165,7 +164,7 @@ impl Player {
 
     // loads a playlist into the queue
     pub fn load_playlist (&mut self, playlist_name: &String) {
-        self.client.load(playlist_name, ..).unwrap();
+        self.client.load(playlist_name.trim(), ..).unwrap();
     }
 
     // get elapsed time of currently playing song in seconds
