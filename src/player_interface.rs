@@ -11,7 +11,6 @@ pub struct PlayerInterface {
 }
 
 impl PlayerInterface {
-
     pub fn new() -> PlayerInterface {
         PlayerInterface {
             music_player: Player::default(),
@@ -37,14 +36,15 @@ impl PlayerInterface {
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
             let track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
             let songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
+            let len = songs_list.len();
 
             // Create vectors to store track data
-            let mut albums_vec = Vec::<String>::with_capacity(songs_list.len());
-            let mut artists_vec = Vec::<String>::with_capacity(songs_list.len());
-            let mut duration_vec = Vec::<String>::with_capacity(songs_list.len());
+            let mut albums_vec = Vec::<String>::with_capacity(len);
+            let mut artists_vec = Vec::<String>::with_capacity(len);
+            let mut duration_vec = Vec::<String>::with_capacity(len);
 
             // Fill the vectors with values retrieved from the player
-            for i in 0..songs_list.len() {
+            for i in 0..len-1 {
                 albums_vec[i] = player::get_album_from_song(&songs_list[i]);
                 artists_vec[i] = player::get_artist_from_song(&songs_list[i]);
                 duration_vec[i] = PlayerInterface::transform_to_time_string(player::get_duration_from_song(&songs_list[i]));
