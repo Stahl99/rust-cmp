@@ -85,7 +85,8 @@ impl Player {
 
     // get all titles in a specific playlist
     pub fn get_all_titles_in_playlist(& mut self, playlist_name: &String) -> Vec<String> {
-        let songs = self.client.playlist(playlist_name).unwrap();
+        self.client.update().unwrap();
+        let songs = self.client.playlist(playlist_name.trim()).unwrap();
         let mut ret_songs: Vec<String> = Vec::new();
         for song in songs {
             ret_songs.push(song.title.unwrap());
@@ -96,7 +97,7 @@ impl Player {
 
     // get all song objects in a playlist
     pub fn get_all_songs_in_playlist(&mut self, playlist_name: &String) -> Vec<Song> {
-        self.client.playlist(playlist_name).unwrap()
+        self.client.playlist(playlist_name.trim()).unwrap()
     }
 
     // set playback volume
