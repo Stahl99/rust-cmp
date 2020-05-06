@@ -44,10 +44,10 @@ impl PlayerInterface {
             let mut duration_vec = Vec::<String>::with_capacity(len);
 
             // Fill the vectors with values retrieved from the player
-            for i in 0..len-1 {
-                albums_vec[i] = player::get_album_from_song(&songs_list[i]);
-                artists_vec[i] = player::get_artist_from_song(&songs_list[i]);
-                duration_vec[i] = PlayerInterface::transform_to_time_string(player::get_duration_from_song(&songs_list[i]));
+            for i in 0..len {
+                albums_vec.push(player::get_album_from_song(&songs_list[i]));
+                artists_vec.push(player::get_artist_from_song(&songs_list[i]));
+                duration_vec.push(PlayerInterface::transform_to_time_string(player::get_duration_from_song(&songs_list[i])));
             }
             let track_stateful_list = StatefulList::with_items(track_list);
             let albums_stateful_list = StatefulList::with_items(albums_vec);
@@ -62,7 +62,7 @@ impl PlayerInterface {
         // If main area is active, the playlist is loaded
         // into the queue and the selected song should be played
         else if current_block.eq(&CurrentElement::MainArea) {
-            let track_name = app.playlist_list.get_selected_element();
+            let track_name = app.tracks_list.get_selected_element();
             self.music_player.clear_queue();
             self.music_player.load_playlist(&self.playlist_name);
             while self.music_player.get_current_song_title() != track_name.to_string() {
