@@ -9,9 +9,9 @@ pub struct PlayerInterface {
     music_player: Player,
     playlist_name: String,
     playlist_length: u32,
-    playing: bool,
     track_list: Vec<String>,
     songs_list: Vec<Song>,
+    offset: usize,
 }
 
 impl PlayerInterface {
@@ -20,9 +20,9 @@ impl PlayerInterface {
             music_player: Player::default(),
             playlist_name: "".to_string(),
             playlist_length: 0,
-            playing: false,
             track_list: Vec::<String>::new(),
             songs_list: Vec::<Song>::new(),
+            offset: 0,
         }
     }
 
@@ -70,16 +70,12 @@ impl PlayerInterface {
         // If main area is active, the playlist is loaded
         // into the queue and the selected song should be played
         else if current_block.eq(&CurrentElement::MainArea) {
-            let selected_index = app.tracks_list.get_selected_index();
+            let selected_index = app.tracks_list.get_selected_index() as u32;
+            self.offset = selected_index as usize;
             self.music_player.clear_queue();
-            self.music_player.load_playlist(&self.playlist_name, 0, self.playlist_length);
-            
-            for _i in 0..selected_index {
-                self.music_player.next_song();
-            }
+            self.music_player.load_playlist(&self.playlist_name, selected_index, self.playlist_length);
 
             self.music_player.play();
-            self.playing = true;
         }
 
         // If playbar controls are active, send the user action
@@ -102,10 +98,10 @@ impl PlayerInterface {
 
     // Updates the UI with playback information (Title, Artist, Playback Position)
     pub fn update_meta_display (&mut self, app: &mut app::App) {
-        if self.playing {
+        if self.music_player.is_playing() {
             let index = self.music_player.get_current_song_id() as usize;
-            app.set_track_name(self.track_list[index].clone());
-            let song_object = self.songs_list[index].clone();
+            app.set_track_name(self.track_list[index + self.offset].clone());
+            let song_object = self.songs_list[index + self.offset].clone();
             app.set_artist_name(player::get_artist_from_song(&song_object));
             let elapsed_seconds = self.music_player.get_elapsed();
             let progress = 1.0 / player::get_duration_from_song(&song_object) as f64 * elapsed_seconds as f64;

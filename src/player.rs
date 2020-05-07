@@ -58,6 +58,10 @@ impl Player {
         }
     }
 
+    pub fn is_playing(&mut self) -> bool {
+        return self.client.status().unwrap().state == State::Play
+    }
+
     // clears current queue
     pub fn clear_queue(&mut self) {
         self.client.clear().unwrap();
