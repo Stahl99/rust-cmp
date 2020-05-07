@@ -72,7 +72,7 @@ impl PlayerInterface {
         else if current_block.eq(&CurrentElement::MainArea) {
             let selected_index = app.tracks_list.get_selected_index();
             self.music_player.clear_queue();
-            self.music_player.load_playlist(&self.playlist_name, self.playlist_length);
+            self.music_player.load_playlist(&self.playlist_name, 0, self.playlist_length);
             
             for _i in 0..selected_index {
                 self.music_player.next_song();

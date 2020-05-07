@@ -174,9 +174,9 @@ impl Player {
     }
 
     // loads a playlist into the queue
-    pub fn load_playlist (&mut self, playlist_name: &String, end: u32) {
+    pub fn load_playlist (&mut self, playlist_name: &String, start: u32,  end: u32) {
         let name = playlist_name.trim();
-        self.client.load(name, 0..end).unwrap();
+        self.client.load(name, start..end).unwrap();
     }
 
     // get elapsed time of currently playing song in seconds
