@@ -129,6 +129,10 @@ impl StatefulSelectedList {
         return &self.on_display[self.selected_element_index_in_on_display];
     }
 
+    pub fn get_selected_index(&mut self) -> usize {
+        return self.selected_element_index_in_on_display;
+    }
+
     // removes the text highlighting element from all list elements passed to the function
     pub fn remove_highlighting_element(&mut self, highlighting_element : char) {
 

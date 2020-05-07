@@ -70,19 +70,14 @@ impl PlayerInterface {
         // If main area is active, the playlist is loaded
         // into the queue and the selected song should be played
         else if current_block.eq(&CurrentElement::MainArea) {
-            let track_name = app.tracks_list.get_selected_element();
+            let selected_index = app.tracks_list.get_selected_index();
             self.music_player.clear_queue();
             self.music_player.load_playlist(&self.playlist_name, self.playlist_length);
             
-            loop {
-                let tmp = self.music_player.get_current_song_title();
-                if tmp != track_name.to_string() {
-                    self.music_player.next_song();
-                }
-                else {
-                    break;
-                }
+            for _i in 0..selected_index {
+                self.music_player.next_song();
             }
+
             self.music_player.play();
             self.playing = true;
         }
@@ -128,7 +123,11 @@ impl PlayerInterface {
             minutes += 1;
             seconds -= 60;
         }
-        let time_string = minutes.to_string() + ":" + &seconds.to_string();
+        let mut divider = ":";
+        if seconds < 10 {
+            divider = ":0";
+        }
+        let time_string = minutes.to_string() + divider + &seconds.to_string();
         return time_string;
     }
 }
