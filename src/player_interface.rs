@@ -3,12 +3,15 @@ use crate::util::StatefulList::StatefulList;
 use crate::util::StatefulSelectedList::CurrentElement;
 use crate::player::Player;
 use crate::player;
+use mpd::Song;
 
 pub struct PlayerInterface {
     music_player: Player,
     playlist_name: String,
     playlist_length: u32,
     playing: bool,
+    track_list: Vec<String>,
+    songs_list: Vec<Song>,
 }
 
 impl PlayerInterface {
@@ -18,6 +21,8 @@ impl PlayerInterface {
             playlist_name: "".to_string(),
             playlist_length: 0,
             playing: false,
+            track_list: Vec::<String>::new(),
+            songs_list: Vec::<Song>::new(),
         }
     }
 
@@ -36,10 +41,10 @@ impl PlayerInterface {
         // If playlist block is active, the tracks in the seleceted playlist are displayed
         if current_block.eq(&CurrentElement::Playlists) {
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
-            let track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
-            self.playlist_length = track_list.len() as u32;
-            let songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
-            let len = songs_list.len();
+            self.track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
+            self.playlist_length = self.track_list.len() as u32;
+            self.songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
+            let len = self.songs_list.len();
 
             // Create vectors to store track data
             let mut albums_vec = Vec::<String>::with_capacity(len);
@@ -48,11 +53,11 @@ impl PlayerInterface {
 
             // Fill the vectors with values retrieved from the player
             for i in 0..len {
-                albums_vec.push(player::get_album_from_song(&songs_list[i]));
-                artists_vec.push(player::get_artist_from_song(&songs_list[i]));
-                duration_vec.push(PlayerInterface::transform_to_time_string(player::get_duration_from_song(&songs_list[i])));
+                albums_vec.push(player::get_album_from_song(&self.songs_list[i]));
+                artists_vec.push(player::get_artist_from_song(&self.songs_list[i]));
+                duration_vec.push(PlayerInterface::transform_to_time_string(player::get_duration_from_song(&self.songs_list[i])));
             }
-            let track_stateful_list = StatefulList::with_items(track_list);
+            let track_stateful_list = StatefulList::with_items(self.track_list.clone());
             let albums_stateful_list = StatefulList::with_items(albums_vec);
             let artists_stateful_list = StatefulList::with_items(artists_vec);
             let durations_stateful_list = StatefulList::with_items(duration_vec);
@@ -69,7 +74,7 @@ impl PlayerInterface {
             self.music_player.clear_queue();
             self.music_player.load_playlist(&self.playlist_name, self.playlist_length);
             
-            while true {
+            loop {
                 let tmp = self.music_player.get_current_song_title();
                 if tmp != track_name.to_string() {
                     self.music_player.next_song();
@@ -103,13 +108,14 @@ impl PlayerInterface {
     // Updates the UI with playback information (Title, Artist, Playback Position)
     pub fn update_meta_display (&mut self, app: &mut app::App) {
         if self.playing {
-            let song = self.music_player.get_current_song();
-            app.set_artist_name(player::get_artist_from_song(&song));
-            app.set_track_name(self.music_player.get_current_song_title());
-            let duration = player::get_duration_from_song(&song);
-            let fraction: f64 = 1.0 / duration as f64;
-            app.current_track_progress = fraction * self.music_player.get_elapsed() as f64;
-            app.track_progress_text = PlayerInterface::transform_to_time_string(self.music_player.get_elapsed());
+            let index = self.music_player.get_current_song_id() as usize;
+            app.set_track_name(self.track_list[index].clone());
+            let song_object = self.songs_list[index].clone();
+            app.set_artist_name(player::get_artist_from_song(&song_object));
+            let elapsed_seconds = self.music_player.get_elapsed();
+            let progress = 1.0 / player::get_duration_from_song(&song_object) as f64 * elapsed_seconds as f64;
+            app.current_track_progress = progress;
+            app.track_progress_text = PlayerInterface::transform_to_time_string(elapsed_seconds);
         }
     }
 
