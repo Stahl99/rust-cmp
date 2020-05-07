@@ -183,6 +183,10 @@ impl Player {
     pub fn get_elapsed(& mut self) -> i64 {
         self.client.status().unwrap().elapsed.unwrap().num_seconds()
     }
+
+    pub fn get_current_song_id(&mut self) -> u32 {
+        self.client.status().unwrap().song.unwrap().pos
+    }
 }
 
 // get a String containing the album from a song object
