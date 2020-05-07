@@ -96,7 +96,9 @@ impl Player {
         let songs = self.client.playlist(playlist_name.trim()).unwrap();
         let mut ret_songs: Vec<String> = Vec::new();
         for song in songs {
-            ret_songs.push(song.title.unwrap());
+            if song.title.is_some() {
+                ret_songs.push(song.title.unwrap());
+            }
         }
 
         ret_songs
@@ -199,8 +201,8 @@ impl Player {
 
 // get a String containing the album from a song object
 pub fn get_album_from_song(song: &Song) -> String {
-    if song.tags.get("album").is_some() {
-        let album: &String = song.tags.get("album").unwrap();
+    if song.tags.get("Album").is_some() {
+        let album: &String = song.tags.get("Album").unwrap();
         album.to_owned()
     }
     else {
@@ -211,8 +213,12 @@ pub fn get_album_from_song(song: &Song) -> String {
 
 // get a String containing the artist from a song object
 pub fn get_artist_from_song(song: &Song) -> String {
-    if song.tags.get("artist").is_some() {
-        let artist: &String = song.tags.get("artist").unwrap();
+    if song.tags.get("Artist").is_some() {
+        let artist: &String = song.tags.get("Artist").unwrap();
+        artist.to_owned()
+    }
+    else if song.tags.get("AlbumArtist").is_some() {
+        let artist: &String = song.tags.get("AlbumArtist").unwrap();
         artist.to_owned()
     }
     else {
@@ -222,5 +228,8 @@ pub fn get_artist_from_song(song: &Song) -> String {
 
 // get the duration of the song in seconds
 pub fn get_duration_from_song(song: &Song) -> i64 {
-    song.duration.unwrap().num_seconds()
+    match song.duration {
+        None => 0,
+        Some(_x) => song.duration.unwrap().num_seconds(),
+    }
 }
