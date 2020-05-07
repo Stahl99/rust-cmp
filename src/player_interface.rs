@@ -57,10 +57,14 @@ impl PlayerInterface {
                 artists_vec.push(player::get_artist_from_song(&self.songs_list[i]));
                 duration_vec.push(PlayerInterface::transform_to_time_string(player::get_duration_from_song(&self.songs_list[i])));
             }
+
+            // Save data in StatefulList
             let track_stateful_list = StatefulList::with_items(self.track_list.clone());
             let albums_stateful_list = StatefulList::with_items(albums_vec);
             let artists_stateful_list = StatefulList::with_items(artists_vec);
             let durations_stateful_list = StatefulList::with_items(duration_vec);
+
+            // Change UI lists to display data in terminal
             app.tracks_list.change_elements(track_stateful_list);
             app.albums_list.change_elements(albums_stateful_list);
             app.artist_list.change_elements(artists_stateful_list);
@@ -70,8 +74,13 @@ impl PlayerInterface {
         // If main area is active, the playlist is loaded
         // into the queue and the selected song should be played
         else if current_block.eq(&CurrentElement::MainArea) {
+
+            // Get the index of the selected track
             let selected_index = app.tracks_list.get_selected_index() as u32;
+            // ...and save it as offset for later use
             self.offset = selected_index as usize;
+
+            // Load new playlist in mpd server starting with the index
             self.music_player.clear_queue();
             self.music_player.load_playlist(&self.playlist_name, selected_index, self.playlist_length);
 
@@ -99,10 +108,17 @@ impl PlayerInterface {
     // Updates the UI with playback information (Title, Artist, Playback Position)
     pub fn update_meta_display (&mut self, app: &mut app::App) {
         if self.music_player.is_playing() {
+            
+            // Get the index of the currently playing track in the queue
             let index = self.music_player.get_current_song_id() as usize;
+
+            // Access the stored metadata vectors with the offset, so the
+            // data matches the currently playing track and set it in the terminal
             app.set_track_name(self.track_list[index + self.offset].clone());
             let song_object = self.songs_list[index + self.offset].clone();
             app.set_artist_name(player::get_artist_from_song(&song_object));
+
+            // Calculation for progress bar
             let elapsed_seconds = self.music_player.get_elapsed();
             let progress = 1.0 / player::get_duration_from_song(&song_object) as f64 * elapsed_seconds as f64;
             app.current_track_progress = progress;
@@ -111,18 +127,23 @@ impl PlayerInterface {
     }
 
     // Converts an integer value of seconds to a time string
-    // * m:ss
+    // format "m:ss"
     fn transform_to_time_string(seconds_input: i64) -> String {
         let mut seconds = seconds_input.clone();
         let mut minutes: i64 = 0;
+
+        // Add a minute for every sixty seconds
         while seconds >= 60 {
             minutes += 1;
             seconds -= 60;
         }
+
+        // Add a "0" if there are less than 10 seconds
         let mut divider = ":";
         if seconds < 10 {
             divider = ":0";
         }
+        
         let time_string = minutes.to_string() + divider + &seconds.to_string();
         return time_string;
     }

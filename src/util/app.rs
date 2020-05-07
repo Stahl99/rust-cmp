@@ -55,34 +55,14 @@ impl<'a> App<'a> {
             view_list: StatefulSelectedList::new(vec![
                 "Show Tracks".to_string(),
             ]),
-            playlist_list: StatefulSelectedList::new(vec![
-                "Ein sehr sehr langer String der unnötig lang ist".to_string(), "This documentation describes a number of methods and trait implementations on the char type. For technical reasons, there is additional, separate documentation in the std::char module as well.".to_string(), "Playlist 3".to_string(), "Playlist 4".to_string(), "Playlist 5".to_string(), 
-                "Playlist 6".to_string(), "Playlist 7".to_string(), "Noch ein extraordinär langer String".to_string(), "Playlist 9".to_string(), "Playlist 10".to_string(), 
-                "Playlist 11".to_string(), "Playlist 12".to_string(), "Playlist 13".to_string(), "Playlist 14".to_string(), "Playlist 15".to_string(), 
-            ]),
-            tracks_list: StatefulSelectedList::new(vec![
-                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
-                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
-            ]),
-            artist_list: StatefulSelectedList::new(vec![
-                "Item0".to_string(), " ".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
-                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
-            ]),
-            albums_list: StatefulSelectedList::new(vec![
-                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
-                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
-            ]),
-            lengths_list: StatefulSelectedList::new(vec![
-                "Item0".to_string(), "Item1".to_string(), "Item2".to_string(), "Item3".to_string(), "Item4".to_string(),
-                 "Item5".to_string(), "Item6".to_string(), "Item7".to_string(), "Item8".to_string(),
-            ]),
+            playlist_list: StatefulSelectedList::new(vec![" ".to_string()]),
+            tracks_list: StatefulSelectedList::new(vec![" ".to_string()]),
+            artist_list: StatefulSelectedList::new(vec![" ".to_string()]),
+            albums_list: StatefulSelectedList::new(vec![" ".to_string()]),
+            lengths_list: StatefulSelectedList::new(vec![" ".to_string()]),
 
-            track_name_list: StatefulSelectedList::new(vec![
-                "Test".to_string()
-            ]),
-            artist_name_list: StatefulSelectedList::new(vec![
-                "Test".to_string()
-            ]),
+            track_name_list: StatefulSelectedList::new(vec![" ".to_string()]),
+            artist_name_list: StatefulSelectedList::new(vec![" ".to_string()]),
 
             current_track_progress: 0.5,
             track_progress_text: String::from("00 : 00"),
@@ -112,8 +92,8 @@ impl<'a> App<'a> {
         app.lengths_list.reset_selection();
 
         // set artist and track name
-        app.set_track_name(String::from("Ein sehr sehr sehr langer Testtrackname"));
-        app.set_artist_name(String::from("Ein sehr sehr sehr langer Artistname"));
+        app.set_track_name(String::from(" "));
+        app.set_artist_name(String::from(" "));
 
         app.track_name_list.reset_selection();
         app.artist_name_list.reset_selection();

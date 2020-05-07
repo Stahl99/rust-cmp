@@ -49,6 +49,8 @@ impl Player {
         }
     }
 
+    // Play if paused, pause if playing
+    // Used for the combined play/pause button
     pub fn toggle_play_pause(& mut self) {
         if self.client.status().unwrap().state == State::Pause {
             self.play();
@@ -58,6 +60,8 @@ impl Player {
         }
     }
 
+
+    // returns true if a track is currently playing
     pub fn is_playing(&mut self) -> bool {
         return self.client.status().unwrap().state == State::Play
     }
