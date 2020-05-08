@@ -17,9 +17,7 @@ use crossterm::{
 };
 use tui::{backend::CrosstermBackend, Terminal};
 
-use argh::FromArgs;
 use std::{
-    io,
     thread,
     time::Duration,
     sync::mpsc,
@@ -53,7 +51,6 @@ fn main() {
 
     // initialize terminal objects and hide curosr
     let mut terminal = terminal::init_terminal();
-    terminal.hide_cursor();
 
     // Setup input handling
     let (tx, rx) = mpsc::channel();
@@ -81,15 +78,27 @@ fn main() {
     // main program loop
     while !app.should_quit {
 
-        terminal::draw_terminal(&mut terminal, &mut app); // draw the UI
+        // draw the UI
+        match terminal::draw_terminal(&mut terminal, &mut app) {
+            Ok(_) => {},
+            // exit the programm if the terminal could not be drawn
+            Err(_) => {println!("Error: could not draw TUI. Programm is shutting down..."); app.should_quit = true; continue;},
+        }
+
         handle_user_input(&mut app, &mut terminal, &rx, &mut player_interface); // handle user input
         terminal::terminal_navigation(&mut app); // handle the terminal navigation
         player_interface.update_meta_display(&mut app); // update display of title and artist
     }
 
     // clear the terminal before exiting the program
-    terminal.clear();
+    match terminal.clear() {
+        Ok(_) => {},
+        Err(_) => println!("Error: terminal could not be cleared! Programm is continuing regardless."),
+    } 
+
+    // shut down the interface
     player_interface.quit();
+    
 }
 
 // handles the user input for the app

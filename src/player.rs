@@ -1,7 +1,6 @@
 extern crate mpd;
 
 use mpd::client::*;
-use std::net::{TcpStream, ToSocketAddrs};
 use mpd::State;
 use mpd::Song;
 use mpd::Query;
@@ -12,13 +11,20 @@ pub struct Player {
 
 impl Player {
     pub fn new(ip_with_port: &String) -> Player {
-        Player {client: Client::connect(ip_with_port).unwrap()}
+        Player {
+            // try to connect to the client
+            client: match Client::connect(ip_with_port) { 
+                Ok(c) => c, // connection successfully established
+                Err(_) => { println!("Error connecting to the server with address: {}", ip_with_port); std::process::exit(1); }, // error
+            }
+        }
     }
 
     // creates a new connection to the given adress
+    #[allow(dead_code)]
     pub fn new_conn(& mut self, address: &String) {
         match Client::connect(address) {
-            Ok(T) => self.client = T,
+            Ok(t) => self.client = t,
             Err(_) => println!("Error connecting to adress: {}", address),
         }
     }
@@ -65,11 +71,13 @@ impl Player {
         self.client.clear().unwrap();
     }
 
+    #[allow(dead_code)]
     pub fn insert_as_first(&mut self, song: Song) {
         self.client.insert(song, 0).unwrap();
     }
 
     // add a song to a queue
+    #[allow(dead_code)]
     pub fn add_to_queue(& mut self, song: Song) {
         self.client.push(song).unwrap();
     }
@@ -107,6 +115,7 @@ impl Player {
     }
 
     // set playback volume
+    #[allow(dead_code)]
     pub fn set_volume(&mut self, volume: i8) {
         self.client.volume(volume).unwrap();
     }
@@ -122,6 +131,7 @@ impl Player {
     }
 
     // get vector of all songs in the current queue
+    #[allow(dead_code)]
     pub fn get_songs_in_queue(&mut self) -> Vec<String> {
         let songs = self.client.queue().unwrap();
         let mut ret_songs: Vec<String> = Vec::new();
@@ -133,11 +143,13 @@ impl Player {
     }
 
     // seek to 'seconds' seconds in current song 
+    #[allow(dead_code)]
     pub fn seek(&mut self, seconds: i64) {
         self.client.rewind(seconds).unwrap();
     }
 
     // get title of current song
+    #[allow(dead_code)]
     pub fn get_current_song_title(&mut self) -> String {
         let song_title: String;
         if self.client.currentsong().unwrap().is_some() {
@@ -152,6 +164,7 @@ impl Player {
     }
 
     // get all song objects in db 
+    #[allow(dead_code)]
     pub fn get_all_songs(&mut self, ) -> Vec<Song> {
         let songs = self.client.search(&Query::new(), (0, 0)).unwrap();
 
@@ -159,6 +172,7 @@ impl Player {
     }
 
     // get all song titles in db
+    #[allow(dead_code)]
     pub fn get_all_song_titles(&mut self) -> Vec<String> {
         let songs = self.client.search(&Query::new(), (0, 1));
         let songs_ = songs.unwrap();
@@ -172,6 +186,7 @@ impl Player {
     }
 
     // get Song object of current song
+    #[allow(dead_code)]
     pub fn get_current_song(&mut self) -> Song {
         if self.client.currentsong().unwrap().is_some() {
             self.client.currentsong().unwrap().unwrap()
@@ -198,7 +213,10 @@ impl Player {
     }
 
     pub fn close_conn(& mut self) {
-        self.client.close();
+        match self.client.close() {
+            Ok(_) => {},
+            Err(_) => {println!("Connection with the server could not be closed! Shutting down regardless.")}
+        }
     }
 }
 

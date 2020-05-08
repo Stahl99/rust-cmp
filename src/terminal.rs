@@ -1,30 +1,41 @@
 use crate::util::app::App;
 use crate::util::StatefulSelectedList::CurrentElement;
 
-use std::io::{stdout};
+use std::io;
+use std::io::stdout;
+
 use tui::{
     Terminal, Frame,
-    widgets::{Widget, Block, Borders, List, Text, Tabs, Gauge},
+    widgets::{Block, Borders, List, Text, Tabs, Gauge},
     layout::{Layout, Constraint, Direction, Rect},
-    style::{Color, Style, Modifier},
-    backend::{CrosstermBackend, Backend}
+    style::{Color, Style},
+    backend::{CrosstermBackend}
 };
 
 pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
 
     // init basic terminal objects
-    let stdout = stdout()/*.into_raw_mode()*/;
+    let stdout = stdout();
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend).unwrap();
 
-    terminal.hide_cursor(); // hide cursor
-    terminal.clear(); // clear terminal
+    // hide cursor
+    match terminal.hide_cursor() {
+        Ok(_) => {},
+        Err(_) => println!("Error: Cursor could not be hidden! Programm is continuing regardless."),
+    } 
+
+    // clear terminal
+    match terminal.clear() {
+        Ok(_) => {},
+        Err(_) => println!("Error: terminal could not be cleared! Programm is continuing regardless."),
+    } 
     
     return terminal;
 }
 
 // function that initiates calls to all other sub draw functions
-pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, app : &mut App) -> () {
+pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>, app : &mut App) -> io::Result<()> {
 
         terminal.draw(|mut f| {
             // set basic chunks
@@ -42,17 +53,13 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
             draw_sidebar(&mut f, app, chunks[0]);
             draw_main_block(&mut f, app, chunks[1]);
             
-            });
+            })
 
 }
 
 // draws the sidebar of the UI
 fn draw_sidebar(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
-
-    let sidebar = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
 
     let chunks = Layout::default() 
         .direction(Direction::Vertical)
@@ -77,10 +84,6 @@ fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
     // string that is printed later as a title
     let rust_cmp_str : &str = "RUST COMMANDLINE MUSIC PLAYER (CMP)";
 
-    let view_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
     // this also accounts for horizontal and vertical scrolling
@@ -91,7 +94,7 @@ fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
     }
 
     // get text from all visible list items
-    let mut items = app.view_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.view_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     // create render object from item list
     let mut render_list = List::new(items)
@@ -116,10 +119,6 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
     // string that is printed later as a title
     let playlist_str : &str = "Playlists";
 
-    let playlist_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
     // this also accounts for horizontal and vertical scrolling
@@ -130,7 +129,7 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
     }
 
     // get text from all visible list items
-    let mut items = app.playlist_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.playlist_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -151,10 +150,6 @@ fn draw_playlist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
-    let main_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     let chunks = Layout::default() 
         .direction(Direction::Vertical)
         .constraints(
@@ -172,12 +167,8 @@ fn draw_main_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 }
 
 // draw the playbar in the center top of the screen
-fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+fn draw_play_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
-
-    let play_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
 
     let chunks = Layout::default() 
         .direction(Direction::Horizontal)
@@ -200,7 +191,7 @@ fn draw_play_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &
 }
 
 // draw tabs used to select buttons at the top of the screen (play/pause etc.)
-fn draw_tab_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+fn draw_tab_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
     let mut tabs = Tabs::default()
@@ -214,7 +205,7 @@ fn draw_tab_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &m
 
 }
 
-fn draw_track_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+fn draw_track_name_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
      // string that is printed later as a title
@@ -230,7 +221,7 @@ fn draw_track_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, a
     }
 
     // get text from all visible list items
-    let mut items = app.track_name_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.track_name_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -246,7 +237,7 @@ fn draw_track_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, a
 
 }
 
-fn draw_artist_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+fn draw_artist_name_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
 
     // string that is printed later as a title
@@ -262,7 +253,7 @@ fn draw_artist_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, 
     }
 
     // get text from all visible list items
-    let mut items = app.artist_name_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.artist_name_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -279,12 +270,8 @@ fn draw_artist_name_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, 
 }
 
 // draws the timeline in the top right of the screen
-fn draw_timeline_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
+fn draw_timeline_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
-
-    let timeline_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
 
     let mut color = Color::Rgb(0, 95, 210); // default Color for timeline
 
@@ -306,10 +293,6 @@ fn draw_timeline_block(mut f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app
 // draws the big table in the center of the screen used to select music
 fn draw_selection_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut App, area : Rect)
 {
-
-    let selection_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
 
     let chunks = Layout::default() 
         .direction(Direction::Horizontal)
@@ -336,10 +319,6 @@ fn draw_tracks_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mu
     // string that is printed later as a title
     let tracks_str : &str = "Track";
 
-    let tracks_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
     // this also accounts for horizontal and vertical scrolling
@@ -350,7 +329,7 @@ fn draw_tracks_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mu
     }
 
     // get text from all visible list items
-    let mut items = app.tracks_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.tracks_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -372,10 +351,6 @@ fn draw_artist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mu
     // string that is printed later as a title
     let artists_str : &str = "Artist";
 
-    let artists_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
     // this also accounts for horizontal and vertical scrolling
@@ -386,7 +361,7 @@ fn draw_artist_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mu
     }
 
     // get text from all visible list items
-    let mut items = app.artist_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.artist_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -408,10 +383,6 @@ fn draw_albums_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mu
     // string that is printed later as a title
     let albums_str : &str = "Album";
 
-    let albums_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
     // this also accounts for horizontal and vertical scrolling
@@ -422,7 +393,7 @@ fn draw_albums_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mu
     }
 
     // get text from all visible list items
-    let mut items = app.albums_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.albums_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
@@ -443,10 +414,6 @@ fn draw_lengths_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &m
     // string that is printed later as a title
     let lengths_str : &str = "Length";
 
-    let lengths_block = Block::default()
-    .borders(Borders::ALL)
-    .render(f, area);
-
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
     // this also accounts for horizontal and vertical scrolling
@@ -457,7 +424,7 @@ fn draw_lengths_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &m
     }
 
     // get text from all visible list items
-    let mut items = app.lengths_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
+    let items = app.lengths_list.get_on_display().iter().map(|i| Text::raw(*(&i.as_str())));
 
     let mut render_list = List::new(items)
         .block(Block::default().borders(Borders::ALL)
