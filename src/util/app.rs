@@ -72,7 +72,7 @@ impl<'a> App<'a> {
             horizontal_scroll_delay: 1,
 
             view_list: StatefulSelectedList::new(vec![
-                "CMP is developed by K.Radke, L.Seyboldt & S.Stahl (c) 2020  ".to_string(),
+                "CMP is made by K.Radke, L.Seyboldt & S.Stahl (c) 2020  ".to_string(),
             ]),
             playlist_list: StatefulSelectedList::new(vec![" ".to_string()]),
             tracks_list: StatefulSelectedList::new(vec![" ".to_string()]),
@@ -88,7 +88,7 @@ impl<'a> App<'a> {
             
             current_element: CurrentElement::Playlists,
             
-            playbar_state: TabsState::new(vec!["<<", ">", ">>"]), 
+            playbar_state: TabsState::new(vec!["|<<", ">>", ">>|"]), 
             should_quit: false,
 
             up: false,
@@ -162,11 +162,34 @@ impl<'a> App<'a> {
 
     pub fn set_track_name (&mut self, new_track_name : String) {
 
-        self.track_name_list.change_elements(StatefulList::with_items(vec![new_track_name]));
+        // get the current track name and check for invalid value
+        let current_track_name = match self.track_name_list.get_elements().items.first() {
+            Some(s) => s,
+            None => " ",
+        };
+
+        // only call the change elements function if the name really has changed
+        // otherwise this would prevent scrolling from happening
+        if new_track_name.trim() != current_track_name.trim() {
+            self.track_name_list.change_elements(StatefulList::with_items(vec![new_track_name]));
+        }
+
     }
 
     pub fn set_artist_name (&mut self, new_artist_name : String) {
-        self.artist_name_list.change_elements(StatefulList::with_items(vec![new_artist_name]));
+
+        // get the current artist name and check for invalid value
+        let current_artist_name = match self.artist_name_list.get_elements().items.first() {
+            Some(s) => s,
+            None => " ",
+        };
+
+        // only call the change elements function if the name really has changed
+        // otherwise this would prevent scrolling from happening
+        if new_artist_name.trim() != current_artist_name.trim() {
+            self.artist_name_list.change_elements(StatefulList::with_items(vec![new_artist_name]));
+        }
+
     }
 
 }

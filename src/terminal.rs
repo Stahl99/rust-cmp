@@ -43,8 +43,8 @@ pub fn draw_terminal(terminal : &mut Terminal<CrosstermBackend<std::io::Stdout>>
                 .direction(Direction::Horizontal)
                 .constraints(
                     [
-                        Constraint::Min(15), // minimal sidebar length
-                        Constraint::Length(120), // default main window length
+                        Constraint::Percentage(20), // minimal sidebar length
+                        Constraint::Percentage(80), // default main window length
                     ].as_ref()
                 )
                 .split(f.size());
@@ -82,7 +82,7 @@ fn draw_view_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
 {
 
     // string that is printed later as a title
-    let rust_cmp_str : &str = "RUST COMMANDLINE MUSIC PLAYER (CMP)";
+    let rust_cmp_str : &str = "RUST COMMANDLINE MUSIC PLAYER (CMP) ♪ ";
 
     // calculated the content of the on_display object
     // which only contains items currently visible in the UI
@@ -174,7 +174,7 @@ fn draw_play_block(f: &mut Frame<CrosstermBackend<std::io::Stdout>>, app : &mut 
         .direction(Direction::Horizontal)
         .constraints(
             [
-                Constraint::Min(15), // tab block
+                Constraint::Min(18), // tab block
                 Constraint::Percentage(25), // track name
                 Constraint::Percentage(25), // artist name
                 Constraint::Percentage(50), // timeline

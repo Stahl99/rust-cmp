@@ -114,6 +114,8 @@ impl PlayerInterface {
     pub fn update_meta_display (&mut self, app: &mut app::App) {
         if self.music_player.is_playing() {
             
+            app.playbar_state.titles[1] = "‖‖";
+
             // Get the index of the currently playing track in the queue
             let index = self.music_player.get_current_song_id() as usize;
 
@@ -128,6 +130,9 @@ impl PlayerInterface {
             let progress = 1.0 / player::get_duration_from_song(&song_object) as f64 * elapsed_seconds as f64;
             app.current_track_progress = progress;
             app.track_progress_text = PlayerInterface::transform_to_time_string(elapsed_seconds);
+        }
+        else {
+            app.playbar_state.titles[1] = ">>";
         }
     }
 
