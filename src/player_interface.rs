@@ -15,9 +15,9 @@ pub struct PlayerInterface {
 }
 
 impl PlayerInterface {
-    pub fn new() -> PlayerInterface {
+    pub fn new(ip_with_port: &String) -> PlayerInterface {
         PlayerInterface {
-            music_player: Player::default(),
+            music_player: Player::new(ip_with_port),
             playlist_name: "".to_string(),
             playlist_length: 0,
             track_list: Vec::<String>::new(),

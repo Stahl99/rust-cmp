@@ -7,8 +7,8 @@ use player_interface::PlayerInterface;
 
 use crate::util::{
     app::App,
+    app::CmdArgs,
     app::Event,
-    app::Cli
 };
 
 use crossterm::{
@@ -24,11 +24,30 @@ use std::{
     time::Duration,
     sync::mpsc,
     sync::mpsc::Receiver,
+    net::IpAddr,
 };
 
 fn main() {
 
-    let cli: Cli = argh::from_env();
+    // parses command line arguments
+    let cli: CmdArgs = argh::from_env();
+
+    // checks if IP address is valid
+    // this also checks the default address (which should be valid)
+    match cli.ip.parse::<IpAddr>() {
+        Err(_v) => {println!("Error: IP Address not valid!"); std::process::exit(1)},
+        Ok(x) => x,
+    };
+
+    // checks if the port is valid
+    // this also checks the default port (which should be valid)
+    match cli.port.parse::<i16>() {
+        Err(_v) => {println!("Error: Port not valid!"); std::process::exit(1)},
+        Ok(x) => x,
+    };
+
+    // constructs string of ip with port to be used later
+    let ip_with_port : String = format!("{}:{}", cli.ip, cli.port);
 
     enable_raw_mode();
 
@@ -56,7 +75,7 @@ fn main() {
     let mut app = App::new();
 
     // create instance of player interface and initialize playlist view
-    let mut player_interface = PlayerInterface::new();
+    let mut player_interface = PlayerInterface::new(&ip_with_port);
     player_interface.initialize(&mut app);
 
     // main program loop

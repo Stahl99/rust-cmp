@@ -10,15 +10,9 @@ pub struct Player {
     client: Client,
 }
 
-impl Default for Player {
-    fn default() -> Player {
-        Player::new(String::from("127.0.0.1:6600"))
-    }
-}
-
 impl Player {
-    pub fn new(addr: String) -> Player {
-        Player {client: Client::connect(addr).unwrap()}
+    pub fn new(ip_with_port: &String) -> Player {
+        Player {client: Client::connect(ip_with_port).unwrap()}
     }
 
     // creates a new connection to the given adress

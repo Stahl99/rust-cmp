@@ -9,6 +9,25 @@ use tui::style::Color;
 
 use argh::FromArgs;
 
+#[derive(FromArgs)]
+#[argh(description = "Configure IP address and tick rate of the server ")]
+pub struct CmdArgs {
+    
+    #[argh(option, default = "String::from(\"127.0.0.1\")")]
+    #[argh(description = "IP Address of the server without port")]
+    pub ip: String,
+
+    #[argh(option, default = "String::from(\"6600\")")]
+    #[argh(description = "configures port of the server")]
+    pub port: String,
+
+    // time in ms between two ticks.
+    #[argh(option, default = "250")]
+    #[argh(description = "tick rate of the client")]
+    pub tick_rate: u64,
+}
+
+
 pub struct App<'a> {
     pub horizontal_scroll_delay: u16,
 
@@ -158,12 +177,4 @@ impl<'a> App<'a> {
 pub enum Event<I> {
     Input(I),
     Tick,
-}
-
-#[derive(Debug, FromArgs)]
-#[argh(description = "...")]
-pub struct Cli {
-    /// time in ms between two ticks.
-    #[argh(option, default = "250")]
-    pub tick_rate: u64,
 }
