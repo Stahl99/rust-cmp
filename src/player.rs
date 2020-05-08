@@ -93,6 +93,9 @@ impl Player {
             if song.title.is_some() {
                 ret_songs.push(song.title.unwrap());
             }
+            else {
+                ret_songs.push(String::from("unknown title"));
+            }
         }
 
         ret_songs
