@@ -488,8 +488,8 @@ pub fn terminal_navigation (app : &mut App) {
         if up {
 
             if app.playlist_list.is_first_element_selected() {
-                app.current_element = CurrentElement::Views;
-                app.view_list.reset_selection();
+                app.current_element = CurrentElement::Playbar;
+                app.playbar_state.index = 0;
                 return;
             }
 
@@ -509,8 +509,8 @@ pub fn terminal_navigation (app : &mut App) {
 
         if left {
             if app.playbar_state.index == 0 {
-                app.current_element = CurrentElement::Views;
-                app.view_list.reset_selection();
+                app.current_element = CurrentElement::Playlists;
+                app.playlist_list.reset_selection();
                 app.playbar_state.index = 3;
                 return;
             }

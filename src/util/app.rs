@@ -6,20 +6,20 @@ use crate::util::stateful_selected_list::{
 };
 
 use tui::style::Color;
-
 use argh::FromArgs;
 
+// this struct stores all command line parameters
 #[derive(FromArgs)]
 #[argh(description = "Configure IP address and tick rate of the server ")]
 pub struct CmdArgs {
     
     #[argh(option, default = "String::from(\"127.0.0.1\")")]
     #[argh(description = "IP Address of the server without port")]
-    pub ip: String,
+    pub ip: String, // the ip to connect to
 
     #[argh(option, default = "String::from(\"6600\")")]
     #[argh(description = "configures port of the server")]
-    pub port: String,
+    pub port: String, // the port to connect to
 
     // time in ms between two ticks.
     #[argh(option, default = "250")]
@@ -72,7 +72,7 @@ impl<'a> App<'a> {
             horizontal_scroll_delay: 1,
 
             view_list: StatefulSelectedList::new(vec![
-                "Show Tracks".to_string(),
+                "CMP is developed by K.Radke, L.Seyboldt & S.Stahl (c) 2020  ".to_string(),
             ]),
             playlist_list: StatefulSelectedList::new(vec![" ".to_string()]),
             tracks_list: StatefulSelectedList::new(vec![" ".to_string()]),
@@ -83,11 +83,11 @@ impl<'a> App<'a> {
             track_name_list: StatefulSelectedList::new(vec![" ".to_string()]),
             artist_name_list: StatefulSelectedList::new(vec![" ".to_string()]),
 
-            current_track_progress: 0.5,
+            current_track_progress: 0.0,
             track_progress_text: String::from("00 : 00"),
             
             current_element: CurrentElement::Playlists,
-            // last element is empty so that it can be selected when no element of the tabs should be selected
+            
             playbar_state: TabsState::new(vec!["<<", ">", ">>"]), 
             should_quit: false,
 
