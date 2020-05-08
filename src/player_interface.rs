@@ -33,6 +33,11 @@ impl PlayerInterface {
         let playlist_stateful_list = StatefulList::with_items(playlist_list);
         app.playlist_list.change_elements(playlist_stateful_list);
     }
+
+    // cleanup connection
+    pub  fn quit (&mut self) {
+        self.music_player.close_conn();
+    }
     
     // This function should be called on user input
     pub fn user_action (&mut self, app : &mut app::App) {

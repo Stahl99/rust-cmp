@@ -89,7 +89,7 @@ fn main() {
 
     // clear the terminal before exiting the program
     terminal.clear();
-
+    player_interface.quit();
 }
 
 // handles the user input for the app
