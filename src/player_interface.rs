@@ -1,6 +1,6 @@
 use crate::util::app;
-use crate::util::StatefulList::StatefulList;
-use crate::util::StatefulSelectedList::CurrentElement;
+use crate::util::stateful_list::StatefulList;
+use crate::util::stateful_selected_list::CurrentElement;
 use crate::player::Player;
 use crate::player;
 use mpd::Song;

@@ -1,4 +1,4 @@
-use crate::util::StatefulList::StatefulList;
+use crate::util::stateful_list::StatefulList;
 
 // this enum is used as a type to tell which part of the
 // UI is currently selected

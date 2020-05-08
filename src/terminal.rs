@@ -1,5 +1,5 @@
 use crate::util::app::App;
-use crate::util::StatefulSelectedList::CurrentElement;
+use crate::util::stateful_selected_list::CurrentElement;
 
 use std::io;
 use std::io::stdout;
@@ -22,13 +22,13 @@ pub fn init_terminal() -> Terminal<CrosstermBackend<std::io::Stdout>> {
     // hide cursor
     match terminal.hide_cursor() {
         Ok(_) => {},
-        Err(_) => println!("Error: Cursor could not be hidden! Programm is continuing regardless."),
+        Err(_) => println!("Error: Cursor could not be hidden! Program is continuing regardless."),
     } 
 
     // clear terminal
     match terminal.clear() {
         Ok(_) => {},
-        Err(_) => println!("Error: terminal could not be cleared! Programm is continuing regardless."),
+        Err(_) => println!("Error: terminal could not be cleared! Program is continuing regardless."),
     } 
     
     return terminal;

@@ -47,7 +47,10 @@ fn main() {
     // constructs string of ip with port to be used later
     let ip_with_port : String = format!("{}:{}", cli.ip, cli.port);
 
-    enable_raw_mode();
+    match enable_raw_mode() {
+        Ok(_) => {},
+        Err(_) => {println!("Error: Could not enable raw mode! Program is continuing regardless.")}
+    }
 
     // initialize terminal objects and hide curosr
     let mut terminal = terminal::init_terminal();
@@ -81,8 +84,8 @@ fn main() {
         // draw the UI
         match terminal::draw_terminal(&mut terminal, &mut app) {
             Ok(_) => {},
-            // exit the programm if the terminal could not be drawn
-            Err(_) => {println!("Error: could not draw TUI. Programm is shutting down..."); app.should_quit = true; continue;},
+            // exit the program if the terminal could not be drawn
+            Err(_) => {println!("Error: could not draw TUI. Program is shutting down..."); app.should_quit = true; continue;},
         }
 
         handle_user_input(&mut app, &mut terminal, &rx, &mut player_interface); // handle user input
@@ -93,12 +96,12 @@ fn main() {
     // clear the terminal before exiting the program
     match terminal.clear() {
         Ok(_) => {},
-        Err(_) => println!("Error: terminal could not be cleared! Programm is continuing regardless."),
+        Err(_) => println!("Error: terminal could not be cleared! Program is continuing regardless."),
     } 
 
     // shut down the interface
     player_interface.quit();
-    
+
 }
 
 // handles the user input for the app
@@ -108,9 +111,19 @@ fn handle_user_input (mut app : &mut App, terminal : &mut Terminal<CrosstermBack
         Ok(Event::Input(event)) => match event.code {
             // check if q has been pressed to exit the program
             KeyCode::Char('q') => {
-                disable_raw_mode();
+
+                // tells the program to shut down
                 app.should_quit = true;
-                terminal.show_cursor();
+
+                match disable_raw_mode() {
+                    Ok(_) => {},
+                    Err(_) => {println!("Error: Could not disable raw mode! Program is continuing regardless.")}
+                }
+
+                match terminal.show_cursor() {
+                    Ok(_) => {},
+                    Err(_) => println!("Error: Cursor could not be shown again! Program is continuing regardless."),
+                } 
             }
 
             // check the arrow keys and safe the values to 

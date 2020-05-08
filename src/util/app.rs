@@ -1,6 +1,6 @@
-use crate::util::StatefulList::StatefulList;
-use crate::util::StatefulList::TabsState;
-use crate::util::StatefulSelectedList::{
+use crate::util::stateful_list::StatefulList;
+use crate::util::stateful_list::TabsState;
+use crate::util::stateful_selected_list::{
     StatefulSelectedList,
     CurrentElement
 };
@@ -50,7 +50,7 @@ pub struct App<'a> {
 
     pub current_element: CurrentElement, // currently selected UI block
     pub playbar_state: TabsState<'a>, // currently selected playbar element
-    pub should_quit: bool, // if set to true the programm exits
+    pub should_quit: bool, // if set to true the program exits
 
     // variables to track user input
     pub up: bool,
