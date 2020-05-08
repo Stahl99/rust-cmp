@@ -23,7 +23,7 @@ impl Player {
         }
     }
 
-    // starts playback on the server
+    // starts playback on the server if not already playing
     pub fn play(& mut self) {
         if self.client.status().unwrap().state == State::Play {
             println!("Already playing");
@@ -190,6 +190,10 @@ impl Player {
 
     pub fn get_current_song_id(&mut self) -> u32 {
         self.client.status().unwrap().song.unwrap().pos
+    }
+
+    pub fn close_conn(& mut self) {
+        self.client.close();
     }
 }
 
