@@ -13,7 +13,3 @@ tui = { version = "0.8", default-features = false, features = ['crossterm'] }
 mpd = "*"
 time = "=0.2.0"
 argh = "0.1.3"
-
-
-[patch.crates-io]
-mpd = { git = 'https://github.com/avatarwin/rust-mpd', branch = 'master'}
