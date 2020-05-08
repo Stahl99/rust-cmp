@@ -12,7 +12,6 @@ pub struct PlayerInterface {
     track_list: Vec<String>,
     songs_list: Vec<Song>,
     offset: usize,
-    all_tracks: bool,
 }
 
 impl PlayerInterface {
@@ -24,7 +23,6 @@ impl PlayerInterface {
             track_list: Vec::<String>::new(),
             songs_list: Vec::<Song>::new(),
             offset: 0,
-            all_tracks: false,
         }
     }
 
@@ -47,7 +45,6 @@ impl PlayerInterface {
 
         // If playlist block is active, the tracks in the seleceted playlist are displayed
         if current_block.eq(&CurrentElement::Playlists) {
-            self.all_tracks = false;
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
             self.track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
             self.songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
@@ -89,16 +86,8 @@ impl PlayerInterface {
 
             self.music_player.clear_queue();
 
-            // Check if a playlist or all tracks are displayed
-            if self.all_tracks {
-                // Load all tracks into queue
-                for i in selected_index..self.playlist_length {
-                    self.music_player.add_to_queue(self.songs_list[i as usize].clone());
-                }
-            } else {
-                // Load new playlist in mpd server starting with the index
-                self.music_player.load_playlist(&self.playlist_name, selected_index, self.playlist_length);
-            }
+            // Load new playlist in mpd server starting with the index
+            self.music_player.load_playlist(&self.playlist_name, selected_index, self.playlist_length);
 
             self.music_player.play();
         }
@@ -118,38 +107,6 @@ impl PlayerInterface {
                 },
                 _ => {}
             }
-        }
-
-        // If "Show Tracks" is selected, display all tracks
-        else if current_block.eq(&CurrentElement::Views) {
-            self.all_tracks = true;
-            self.track_list = self.music_player.get_all_song_titles();
-            self.songs_list = self.music_player.get_all_songs();
-            self.playlist_length = self.songs_list.len() as u32;
-
-            // Create vectors to store track data
-            let mut albums_vec = Vec::<String>::with_capacity(self.playlist_length as usize);
-            let mut artists_vec = Vec::<String>::with_capacity(self.playlist_length as usize);
-            let mut duration_vec = Vec::<String>::with_capacity(self.playlist_length as usize);
-
-            // Fill the vectors with values retrieved from the player
-            for i in 0..self.playlist_length as usize {
-                albums_vec.push(player::get_album_from_song(&self.songs_list[i]));
-                artists_vec.push(player::get_artist_from_song(&self.songs_list[i]));
-                duration_vec.push(PlayerInterface::transform_to_time_string(player::get_duration_from_song(&self.songs_list[i])));
-            }
-
-            // Save data in StatefulList
-            let track_stateful_list = StatefulList::with_items(self.track_list.clone());
-            let albums_stateful_list = StatefulList::with_items(albums_vec);
-            let artists_stateful_list = StatefulList::with_items(artists_vec);
-            let durations_stateful_list = StatefulList::with_items(duration_vec);
-
-            // Change UI lists to display data in terminal
-            app.tracks_list.change_elements(track_stateful_list);
-            app.albums_list.change_elements(albums_stateful_list);
-            app.artist_list.change_elements(artists_stateful_list);
-            app.lengths_list.change_elements(durations_stateful_list);
         }
     }
 
