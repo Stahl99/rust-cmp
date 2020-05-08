@@ -150,14 +150,16 @@ impl Player {
 
     // get all song objects in db 
     pub fn get_all_songs(&mut self, ) -> Vec<Song> {
-        let songs = self.client.search(&Query::new(), (1, 2)).unwrap();
+        //let songs = self.client.search(&Query::new(), (0, 0)).unwrap();
+        let songs = self.client.listall().unwrap();
 
         songs
     }
 
     // get all song titles in db
     pub fn get_all_song_titles(&mut self) -> Vec<String> {
-        let songs = self.client.search(&Query::new(), (1, 2)).unwrap();
+        //let songs = self.client.search(&Query::new(), (1, 100)).unwrap();
+        let songs = self.client.listall().unwrap();
         let mut song_titles: Vec<String> = Vec::new();
         for song in songs {
             song_titles.push(song.title.unwrap());
