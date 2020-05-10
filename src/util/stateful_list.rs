@@ -77,6 +77,7 @@ impl<T> StatefulList<T> {
         self.state.select(Some(i));
     }
 
+    #[allow(dead_code)]
     pub fn unselect(&mut self) {
         self.state.select(None);
     }

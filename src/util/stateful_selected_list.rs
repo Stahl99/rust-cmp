@@ -1,4 +1,4 @@
-use crate::util::StatefulList::StatefulList;
+use crate::util::stateful_list::StatefulList;
 
 // this enum is used as a type to tell which part of the
 // UI is currently selected
@@ -14,6 +14,7 @@ pub enum CurrentElement {
 }
 
 impl CurrentElement {
+    #[allow(dead_code)]
     fn eq(&self, other: &Self) -> bool {
         self == other
     }
@@ -71,6 +72,7 @@ impl StatefulSelectedList {
         self.all_elements.previous();
     }
 
+    #[allow(dead_code)]
     pub fn get_elements(&mut self) -> &StatefulList<String> {
         &self.all_elements
     }
@@ -186,7 +188,7 @@ impl StatefulSelectedList {
             let mut tmp_scroll_status = 0; // create tmp scroll status var that resembles the current scroll_status of the current scroll_string
 
             // repeat this loop as often as the element had been scrolled
-            for j in 0..self.all_elements_scroll_status[self.all_elements.state.offset+i].scroll_status {
+            for _j in 0..self.all_elements_scroll_status[self.all_elements.state.offset+i].scroll_status {
                 let scroll_element_return_val = self.scroll_element(&scroll_string, tmp_scroll_status, 0, false); // call the scrolling function
                 scroll_string = scroll_element_return_val.0; // set the string to its new value
                 tmp_scroll_status = scroll_element_return_val.1; // update the temporary scroll status

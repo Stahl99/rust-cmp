@@ -1,6 +1,6 @@
 use crate::util::app;
-use crate::util::StatefulList::StatefulList;
-use crate::util::StatefulSelectedList::CurrentElement;
+use crate::util::stateful_list::StatefulList;
+use crate::util::stateful_selected_list::CurrentElement;
 use crate::player::Player;
 use crate::player;
 use mpd::Song;
@@ -33,6 +33,11 @@ impl PlayerInterface {
         let playlist_stateful_list = StatefulList::with_items(playlist_list);
         app.playlist_list.change_elements(playlist_stateful_list);
     }
+
+    // cleanup connection
+    pub  fn quit (&mut self) {
+        self.music_player.close_conn();
+    }
     
     // This function should be called on user input
     pub fn user_action (&mut self, app : &mut app::App) {
@@ -42,17 +47,16 @@ impl PlayerInterface {
         if current_block.eq(&CurrentElement::Playlists) {
             self.playlist_name = app.playlist_list.get_selected_element().to_string();
             self.track_list = self.music_player.get_all_titles_in_playlist(&self.playlist_name);
-            self.playlist_length = self.track_list.len() as u32;
             self.songs_list = self.music_player.get_all_songs_in_playlist(&self.playlist_name);
-            let len = self.songs_list.len();
+            self.playlist_length = self.songs_list.len() as u32;
 
             // Create vectors to store track data
-            let mut albums_vec = Vec::<String>::with_capacity(len);
-            let mut artists_vec = Vec::<String>::with_capacity(len);
-            let mut duration_vec = Vec::<String>::with_capacity(len);
+            let mut albums_vec = Vec::<String>::with_capacity(self.playlist_length as usize);
+            let mut artists_vec = Vec::<String>::with_capacity(self.playlist_length as usize);
+            let mut duration_vec = Vec::<String>::with_capacity(self.playlist_length as usize);
 
             // Fill the vectors with values retrieved from the player
-            for i in 0..len {
+            for i in 0..self.playlist_length as usize {
                 albums_vec.push(player::get_album_from_song(&self.songs_list[i]));
                 artists_vec.push(player::get_artist_from_song(&self.songs_list[i]));
                 duration_vec.push(PlayerInterface::transform_to_time_string(player::get_duration_from_song(&self.songs_list[i])));
@@ -80,8 +84,9 @@ impl PlayerInterface {
             // ...and save it as offset for later use
             self.offset = selected_index as usize;
 
-            // Load new playlist in mpd server starting with the index
             self.music_player.clear_queue();
+
+            // Load new playlist in mpd server starting with the index
             self.music_player.load_playlist(&self.playlist_name, selected_index, self.playlist_length);
 
             self.music_player.play();
@@ -109,6 +114,8 @@ impl PlayerInterface {
     pub fn update_meta_display (&mut self, app: &mut app::App) {
         if self.music_player.is_playing() {
             
+            app.playbar_state.titles[1] = "‖‖";
+
             // Get the index of the currently playing track in the queue
             let index = self.music_player.get_current_song_id() as usize;
 
@@ -123,6 +130,9 @@ impl PlayerInterface {
             let progress = 1.0 / player::get_duration_from_song(&song_object) as f64 * elapsed_seconds as f64;
             app.current_track_progress = progress;
             app.track_progress_text = PlayerInterface::transform_to_time_string(elapsed_seconds);
+        }
+        else {
+            app.playbar_state.titles[1] = ">>";
         }
     }
 

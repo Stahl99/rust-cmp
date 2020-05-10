@@ -1,3 +1,3 @@
-pub mod StatefulList;
+pub mod stateful_list;
 pub mod app;
-pub mod StatefulSelectedList;
+pub mod stateful_selected_list;

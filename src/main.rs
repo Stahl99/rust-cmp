@@ -17,9 +17,7 @@ use crossterm::{
 };
 use tui::{backend::CrosstermBackend, Terminal};
 
-use argh::FromArgs;
 use std::{
-    io,
     thread,
     time::Duration,
     sync::mpsc,
@@ -49,11 +47,13 @@ fn main() {
     // constructs string of ip with port to be used later
     let ip_with_port : String = format!("{}:{}", cli.ip, cli.port);
 
-    enable_raw_mode();
+    match enable_raw_mode() {
+        Ok(_) => {},
+        Err(_) => {println!("Error: Could not enable raw mode! Program is continuing regardless.")}
+    }
 
     // initialize terminal objects and hide curosr
     let mut terminal = terminal::init_terminal();
-    terminal.hide_cursor();
 
     // Setup input handling
     let (tx, rx) = mpsc::channel();
@@ -81,14 +81,26 @@ fn main() {
     // main program loop
     while !app.should_quit {
 
-        terminal::draw_terminal(&mut terminal, &mut app); // draw the UI
+        // draw the UI
+        match terminal::draw_terminal(&mut terminal, &mut app) {
+            Ok(_) => {},
+            // exit the program if the terminal could not be drawn
+            Err(_) => {println!("Error: could not draw TUI. Program is shutting down..."); app.should_quit = true; continue;},
+        }
+
         handle_user_input(&mut app, &mut terminal, &rx, &mut player_interface); // handle user input
         terminal::terminal_navigation(&mut app); // handle the terminal navigation
         player_interface.update_meta_display(&mut app); // update display of title and artist
     }
 
     // clear the terminal before exiting the program
-    terminal.clear();
+    match terminal.clear() {
+        Ok(_) => {},
+        Err(_) => println!("Error: terminal could not be cleared! Program is continuing regardless."),
+    } 
+
+    // shut down the interface
+    player_interface.quit();
 
 }
 
@@ -99,9 +111,19 @@ fn handle_user_input (mut app : &mut App, terminal : &mut Terminal<CrosstermBack
         Ok(Event::Input(event)) => match event.code {
             // check if q has been pressed to exit the program
             KeyCode::Char('q') => {
-                disable_raw_mode();
+
+                // tells the program to shut down
                 app.should_quit = true;
-                terminal.show_cursor();
+
+                match disable_raw_mode() {
+                    Ok(_) => {},
+                    Err(_) => {println!("Error: Could not disable raw mode! Program is continuing regardless.")}
+                }
+
+                match terminal.show_cursor() {
+                    Ok(_) => {},
+                    Err(_) => println!("Error: Cursor could not be shown again! Program is continuing regardless."),
+                } 
             }
 
             // check the arrow keys and safe the values to 
