@@ -10,6 +10,7 @@ pub struct Player {
 }
 
 impl Player {
+    // create new Player object with given adress
     pub fn new(ip_with_port: &String) -> Player {
         Player {
             // try to connect to the client
@@ -176,7 +177,6 @@ impl Player {
     pub fn get_all_song_titles(&mut self) -> Vec<String> {
         let songs = self.client.search(&Query::new(), (0, 1));
         let songs_ = songs.unwrap();
-        //let songs = self.client.listall().unwrap();
         let mut song_titles: Vec<String> = Vec::new();
         for song in songs_ {
             song_titles.push(song.title.unwrap());
@@ -208,10 +208,12 @@ impl Player {
         self.client.status().unwrap().elapsed.unwrap().num_seconds()
     }
 
+    // get the playlist id of the current song
     pub fn get_current_song_id(&mut self) -> u32 {
         self.client.status().unwrap().song.unwrap().pos
     }
 
+    // close the connection to the server
     pub fn close_conn(& mut self) {
         match self.client.close() {
             Ok(_) => {},
